@@ -14,8 +14,6 @@ class cell {
         vector<entity*>* getEntityVector();       /* parameter desc: */
         ~cell();
     private:
-        int users;
-        int sensingTasks;
         int cost;                                 /* var desc: cost of moving cell to cell  */
         vector<entity*> entityVector;             /* var desc: occupancy list */
 };
@@ -25,7 +23,7 @@ class entity {
         void setCoord(char, int);
         void getCoord(char);
     private:
-        int SID;
+        int SID;            /* set(): */
         int x;
         int y;
 
@@ -83,9 +81,10 @@ enum gameStatus {
 class game {
     public:
         game();                 /* constructs enviroment -> constructs users and sensing tasks */
-        void setGame();         /* reset board to inital conditions */
-        void movUser(user*, cell, cell);          /* parameter desc: user moving, source, destination */
+        void set();         /* reset board to inital conditions */
         gameStatus play();      /* play game */
+        void save();
+        void movUser(user*, cell, cell);          /* parameter desc: user moving, source, destination */
     private:
         gameStatus state;
         int totalTime;
