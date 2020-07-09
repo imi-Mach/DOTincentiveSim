@@ -1,10 +1,10 @@
 #include "elements.hpp"
 
-cell::cell(int travelCost) {
+Cell::Cell(int travelCost) {
     int cost = travelCost;
 }
 
-void cell::addEntity(entity* enteringEntity) {
+void Cell::addEntity(Entity* enteringEntity) {
     
     int size;
     int i;
@@ -30,7 +30,7 @@ void cell::addEntity(entity* enteringEntity) {
 
 }
 
-void cell::delEntity(entity* leavingEntity) {
+void Cell::delEntity(Entity* leavingEntity) {
     int size = entityVector.size();
     for(int i = 0; i < size; i++) {
         if(entityVector[i] == leavingEntity) {
@@ -40,159 +40,119 @@ void cell::delEntity(entity* leavingEntity) {
     }
 }
 
-cell::~cell() {
+Cell::~Cell() {
 
 }
 
-user::user() {
-    SID       = 0;
-    opTime    = 0;
-    opCost    = 0;
-    distance  = 0;
-    coord[0]  = -1;
-    coord[1]  = -1;
-    accReward = 0.0;
-}
-
-void user::set(int x, int y) {
-    SID       = 0;
-    opTime    = 0;
-    opCost    = 0;
-    distance  = 0;
-    coord[0]  = x;
-    coord[1]  = y;
-    accReward = 0.0;
-}
-
-int user::getCoord(const char component) {
+void Entity::setCoord(const char component, int posVal) {
     switch(component) {
         case 'x':
-            return coord[0];
+            x = posVal;
+            return;
             break;
 
         case 'y':
-            return coord[1];
+            y = posVal;
+            return;
             break;
         
         default:
-            bail(2, "Incorrect use of getCoord function");
 
     }
-    cerr << "Warning, getCoord failed to return coord or error!" << endl;
+    bail(2, "Incorrect use of setCoord function");
+    cerr << "FATAL error: setCoord failed to return coord or error!" << endl;
+    return;
+}
+
+int Entity::getCoord(const char component) {
+    switch(component) {
+        case 'x':
+            return x;
+            break;
+
+        case 'y':
+            return y;
+            break;
+        
+        default:
+
+    }
+    bail(2, "Incorrect use of getCoord function");
+    cerr << "FATAL error: getCoord failed to return coord or error!" << endl;
     return -2;
 }
 
-int user::selectSID(sensingTask *sensingTaskList) {
+User::User() {
+    SID       = 0;
+    x         = -1;
+    y         = -1;
+    opTime    = 0;
+    opCost    = 0;
+    distance  = 0;
+    accReward = 0.0;
+}
+
+void User::set(int x, int y) {
     
 }
 
-user::~user() {
+int User::selectSID(SensingTask *sensingTaskList) {
+    
+}
+
+User::~User() {
 
 }
 
-sensingTask::sensingTask(int indexSID, float incentive) {
+SensingTask::SensingTask(int indexSID, float incentive) {
     SID         = indexSID;
-    coord[0]    = -1;
-    coord[1]    = -1;
+    x           = -1;
+    y           = -1;
     status      = false;
     reward      = incentive;
     participant = NULL;
 }
 
-void sensingTask::set(int x, int y) {
+void SensingTask::set(int x, int y) {
     coord[0]    = x;
     coord[1]    = y;
     status      = false;
     participant = NULL;
 }
 
-int sensingTask::getCoord(const char component) {
-    switch(component) {
-        case 'x':
-            return coord[0];
-            break;
-
-        case 'y':
-            return coord[1];
-            break;
-        
-        default:
-            bail(2, "Incorrect use of getCoord function");
-
-    }
-    cerr << "Warning, getCoord failed to return coord or error!" << endl;
-    return -2;
-}
-
-sensingTask::~sensingTask() {
+SensingTask::~SensingTask() {
 
 }
 
-enviroment::enviroment(int numIncent, int userNum, int boardSize, float preBudget, float percent) {    
-    totalTime          = 0;
-    totalIncentives    = numIncent;
-    totalUsers         = userNum;
-    size               = boardSize;
-    predictedBudget    = preBudget;
-    coveragePercentage = percent;
-    
-    userList.assign(totalUsers, user());
-
-    for(int i = 0; totalIncentives > i; i++)
-        taskList.push_back(sensingTask(i+1, preBudget/(float)numIncent));
-}
-
-void enviroment::set() {
-    totalTime = 0;
-
-    int x = -1;
-    int y = -1;
-
-    /* 
-    * performance evaulation:
-    *   - nested for loops 
-    *   - check all other users if coords match random generated overlap
-    */
-    for(int i = 0; totalUsers > i; i++) {  /* assume users cannot be on the same coordinates */
-
-        x = rand()%size;      /* random x int component in range [0, size] */
-        y = rand()%size;      /* random y int component in range [0, size] */
-
-        for(int j = 0; totalUsers > j; j++) {   /* check every user if on same grid */
-            if(i != j) {
-                if ((userList[j].getCoord('x') == x) && (userList[j].getCoord('y') == y)) {
-                    i--;
-                    continue;
-                }
-            }
-        }
-
-        userList[i].set(rand()%size, rand()%size);
-    }
-
-    x = -1;
-    y = -1;
-
-    for(int i = 0; totalIncentives > i; i++) { /* assume incentives will not be on the same task */
-        
-        x = rand()%size;        /* random x int component in range [0, size] */
-        y = rand()%size;        /* random y int component in range [0, size] */
-
-        for(int j = 0; totalIncentives > j; j++) {      /* check every user if on same grid */
-            if(i != j) {
-                if ((taskList[j].getCoord('x') == x) && (taskList[j].getCoord('y') == y)) {
-                    i--;
-                    continue;
-                }
-            }
-        }
-
-        taskList[i].set(rand()%size, rand()%size);
-    }
+Enviroment::Enviroment(int size) {    
 
 }
 
-void enviroment::play() {
+void Enviroment::set(int numUsers, int numIncent) {
+
+}
+
+void Enviroment::placeEntity(Entity* newEntity) {
+
+}
+
+Cell* Enviroment::getCell(int x, int y) {
+
+}
+
+Enviroment::~Enviroment() {
+
+}
+
+Game::game() {
+
+}
+
+void Game::set() {
+
+}
+
+gameStatus Game::play() {
     /*
     * Outline:
     *   - at start, all users are randomly selected to select sensing task (shuffle)
@@ -205,23 +165,15 @@ void enviroment::play() {
 
 }
 
-void enviroment::save() {
+void Game::save() {
 
 }
 
-enviroment::~enviroment() {
-
-}
-
-game::game(){
-
-}
-
-void game::movUser(user* movingUser, cell oldCell, cell newCell) {
+void Game::movUser(User* movingUser, Cell* oldCell, Cell* newCell) {
     
 }
 
-game::~game(){
+Game::~Game() {
     userList.clear();
     taskList.clear();
 }

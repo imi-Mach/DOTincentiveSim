@@ -6,34 +6,35 @@
 
 using namespace std;
 
-class cell {
+class Cell {
     public:
-        cell(int);
-        void addEntity(entity*);                  /* parameter desc: add new entity pointer to cell's occupany list*/
-        void delEntity(entity*);                  /* parameter desc: */
-        vector<entity*>* getEntityVector();       /* parameter desc: */
-        ~cell();
+        Cell(int);
+        void addEntity(Entity*);                  /* parameter desc: add new entity pointer to cell's occupany list*/
+        void delEntity(Entity*);                  /* parameter desc: */
+        vector<Entity*>* getEntityVector();       /* parameter desc: */
+        ~Cell();
     private:
         int cost;                                 /* var desc: cost of moving cell to cell  */
-        vector<entity*> entityVector;             /* var desc: occupancy list */
+        vector<Entity*> entityVector;             /* var desc: occupancy list */
 };
 
-class entity {
+class Entity {
     public:
-        void setCoord(char, int);
-        void getCoord(char);
-    private:
+        void setCoord(const char, int);
+        int getCoord(const char);
+    protected:
         int SID;            /* set(): */
         int x;
         int y;
 
 };
 
-class user : public entity {
+class User : public Entity {
     public:
-        user();                             /* construct phase:  */
-        int  selectSID(sensingTask *);      /* decide what the SID is */
-        ~user();
+        User();                             /* construct phase:  */
+        void set(int, int);
+        int  selectSID(SensingTask *);      /* decide what the SID is */
+        ~User();
     private:
         int opTime;         /* set(): */
         int opCost;         /* set(): */
@@ -41,26 +42,26 @@ class user : public entity {
         float accReward;    /* set(): */
 };
 
-class sensingTask : public entity {
+class SensingTask : public Entity {
     public:
-        sensingTask(int, float);    /* construct phase: */
-        ~sensingTask();
+        SensingTask(int, float);    /* construct phase: */
+        ~SensingTask();
     private:
         bool status;                /* c): true = finished, false = not finished */
         float reward;               /* c): */
-        user *participant;          /* c): */
+        User *participant;          /* c): */
 
 };
 
-class enviroment {
+class Enviroment {
     public:
-        enviroment(int);            /* parameter desc: sideLength of square board */
+        Enviroment(int);            /* parameter desc: sideLength of square board */
         void set(int, int);         /* parameter desc: num of users, num of incentives */
-        void placeEntity(entity*);  /* parameter desc: reference for entity to assign to cell */
-        cell* getCell(int, int);    /* parameter desc: x coord and y coord */
-        ~enviroment();
+        void placeEntity(Entity*);  /* parameter desc: reference for entity to assign to cell */
+        Cell* getCell(int, int);    /* parameter desc: x coord and y coord for entity placement */
+        ~Enviroment();
     private:
-        vector< vector<cell> > grid;      /* c): 2d map of cells */
+        vector< vector<Cell> > grid;      /* c): 2d map of cells */
         int size;                         /* c): */
 
 };
@@ -71,13 +72,13 @@ enum gameStatus {
     USERSFAILED,
 };
 
-class game {
+class Game {
     public:
-        game();                 /* constructs enviroment -> constructs users and sensing tasks */
+        Game();                 /* constructs enviroment -> constructs users and sensing tasks */
         void set();         /* reset board to inital conditions */
         gameStatus play();      /* play game */
         void save();
-        void movUser(user*, cell, cell);          /* parameter desc: user moving, source, destination */
+        void movUser(User*, Cell*, Cell*);          /* parameter desc: user moving, source, destination */
     private:
         gameStatus state;
         int totalTime;
@@ -86,8 +87,9 @@ class game {
         int boardSize;
         float preBudget;
         float coveragePercentage;
-        vector<user> userList;            /* c): */
-        vector<sensingTask> taskList;     /* c): */
+        Enviroment board;
+        vector<User> userList;            /* c): */
+        vector<SensingTask> taskList;     /* c): */
 
 };
 
