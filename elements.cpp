@@ -142,12 +142,6 @@ enviroment::enviroment(int numIncent, int userNum, int boardSize, float preBudge
         taskList.push_back(sensingTask(i+1, preBudget/(float)numIncent));
 }
 
-void enviroment::shuffle() {
-
-    
-
-}
-
 void enviroment::set() {
     totalTime = 0;
 

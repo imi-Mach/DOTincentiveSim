@@ -35,7 +35,6 @@ class user : public entity {
         int  selectSID(sensingTask *);      /* decide what the SID is */
         ~user();
     private:
-        int SID;            /* set(): */
         int opTime;         /* set(): */
         int opCost;         /* set(): */
         int distance;       /* set(): */
@@ -47,8 +46,6 @@ class sensingTask : public entity {
         sensingTask(int, float);    /* construct phase: */
         ~sensingTask();
     private:
-        int SID;                    /* c):  */
-        int coord[2];              /* set(): */
         bool status;                /* c): true = finished, false = not finished */
         float reward;               /* c): */
         user *participant;          /* c): */
@@ -57,18 +54,14 @@ class sensingTask : public entity {
 
 class enviroment {
     public:
-        enviroment(int, int, int, float, float);
-        void shuffle();
-        void set();
-        void play();
-        void save();
+        enviroment(int);            /* parameter desc: sideLength of square board */
+        void set(int, int);         /* parameter desc: num of users, num of incentives */
+        void placeEntity(entity*);  /* parameter desc: reference for entity to assign to cell */
+        cell* getCell(int, int);    /* parameter desc: x coord and y coord */
         ~enviroment();
     private:
-        int curIncentives;                /* c): */
-        int curUsers;                     /* c): */
+        vector< vector<cell> > grid;      /* c): 2d map of cells */
         int size;                         /* c): */
-        vector<user> userList;            /* c): */
-        vector<sensingTask> taskList;     /* c): */
 
 };
 
@@ -93,7 +86,8 @@ class game {
         int boardSize;
         float preBudget;
         float coveragePercentage;
-
+        vector<user> userList;            /* c): */
+        vector<sensingTask> taskList;     /* c): */
 
 };
 
