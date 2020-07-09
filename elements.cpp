@@ -12,13 +12,14 @@ void cell::addEntity(entity* enteringEntity) {
     /* empty vector case */
     if(entityVector.empty()) {
         entityVector.push_back(enteringEntity);
+        return;
     }
 
     size = entityVector.size();
 
     /* scan through vector for NULL pointers */
     for(i = 0; i < size; i++) {
-        if(entityVector[i] == NULL) {
+        if(entityVector[i] == nullptr) {
             entityVector[i] = enteringEntity;
             return;
         }
@@ -33,7 +34,7 @@ void cell::delEntity(entity* leavingEntity) {
     int size = entityVector.size();
     for(int i = 0; i < size; i++) {
         if(entityVector[i] == leavingEntity) {
-            entityVector[i] == NULL;
+            entityVector[i] = nullptr;
             return;
         }
     }
@@ -215,8 +216,7 @@ void enviroment::save() {
 }
 
 enviroment::~enviroment() {
-    userList.clear();
-    taskList.clear();
+
 }
 
 game::game(){
@@ -228,5 +228,6 @@ void game::movUser(user* movingUser, cell oldCell, cell newCell) {
 }
 
 game::~game(){
-    
+    userList.clear();
+    taskList.clear();
 }
