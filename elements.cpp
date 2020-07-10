@@ -114,10 +114,7 @@ SensingTask::SensingTask(int indexSID, float incentive) {
 }
 
 void SensingTask::set(int x, int y) {
-    coord[0]    = x;
-    coord[1]    = y;
-    status      = false;
-    participant = NULL;
+    
 }
 
 SensingTask::~SensingTask() {
@@ -144,7 +141,29 @@ Enviroment::~Enviroment() {
 
 }
 
-Game::game() {
+Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
+    /*
+    * Game constructor:
+    *   - Responsible for initializing all variables
+    *       - local variables intialized
+    *       - enviroment constructed and pointed to
+    *       - set of users constructed and pointed to
+    *       - set of sensing tasks constructed and pointed to
+    */
+
+    state = CONSTRUCTION;
+    totalTime = 0;
+    totalIncentives = numIncent;
+    totalUsers = numUser;
+    boardSize = size;
+    preBudget = predictedBudget;
+
+    board = new Enviroment(boardSize);
+
+    for(int i = 0; i < numUser; i++) {
+        userList.push_back(User());
+    }
+
 
 }
 
@@ -152,7 +171,7 @@ void Game::set() {
 
 }
 
-gameStatus Game::play() {
+void Game::play() {
     /*
     * Outline:
     *   - at start, all users are randomly selected to select sensing task (shuffle)
@@ -166,6 +185,10 @@ gameStatus Game::play() {
 }
 
 void Game::save() {
+
+}
+
+void Game::reset() {
 
 }
 

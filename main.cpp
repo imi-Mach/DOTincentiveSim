@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include "elements.hpp"
 #include "functions.hpp"
 
@@ -12,8 +13,8 @@ int main(int argc, char **argv) {
     
     cout << string(50, '\n') << endl;
 
-    int   numIncent;
     int   trials;
+    int   numIncent;
     int   userNum;
     int   boardSize;
     float preBudget;  /* optimize problem with numIncentives */
@@ -21,17 +22,16 @@ int main(int argc, char **argv) {
 
     int   round = 1;
 
-
     parseArgs(argc, argv, &trials, &userNum, &boardSize, &preBudget, &percent);
     
-    numIncent = (int)((float)boardSize * percent / 100);
+    numIncent = (int)floor(((float)(boardSize * boardSize) * percent / 100));
     
-    enviroment board(numIncent, preBudget, userNum, boardSize, percent);    /* constructing phase */
+    Game game(numIncent, userNum, boardSize, preBudget);    /* constructing phase */
 
     while(trials >= round) {
-        board.set();            /* set non-static variables to start */
-        board.play();           /* turn based game, ends when users all dropout */
-        board.save();           /* print results into a file the results */
+        game.set();            /* set non-static variables to start */
+        game.play();           /* turn based game, ends when users all dropout */
+        game.save();           /* print results into a file the results */
         round++;
     }
     

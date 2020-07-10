@@ -45,6 +45,7 @@ class User : public Entity {
 class SensingTask : public Entity {
     public:
         SensingTask(int, float);    /* construct phase: */
+        void set(int, int);
         ~SensingTask();
     private:
         bool status;                /* c): true = finished, false = not finished */
@@ -61,12 +62,13 @@ class Enviroment {
         Cell* getCell(int, int);    /* parameter desc: x coord and y coord for entity placement */
         ~Enviroment();
     private:
-        vector< vector<Cell> > grid;      /* c): 2d map of cells */
+        vector< vector<Cell> > *grid;      /* c): 2d map of cells */
         int size;                         /* c): */
 
 };
 
 enum gameStatus {
+    CONSTRUCTION,
     INPROGRESS,
     COMPLETE,
     USERSFAILED,
@@ -74,10 +76,11 @@ enum gameStatus {
 
 class Game {
     public:
-        Game();                 /* constructs enviroment -> constructs users and sensing tasks */
+        Game(int, int, int, float);                 /* constructs enviroment -> constructs users and sensing tasks */
         void set();         /* reset board to inital conditions */
-        gameStatus play();      /* play game */
+        void play();      /* play game */
         void save();
+        void reset();
         void movUser(User*, Cell*, Cell*);          /* parameter desc: user moving, source, destination */
     private:
         gameStatus state;
@@ -86,8 +89,7 @@ class Game {
         int totalUsers;
         int boardSize;
         float preBudget;
-        float coveragePercentage;
-        Enviroment board;
+        Enviroment *board;
         vector<User> userList;            /* c): */
         vector<SensingTask> taskList;     /* c): */
 
