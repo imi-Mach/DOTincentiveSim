@@ -121,8 +121,18 @@ SensingTask::~SensingTask() {
 
 }
 
-Enviroment::Enviroment(int size) {    
+Enviroment::Enviroment(int size) { 
 
+    int cost = 1; /* cost for traveling into a cell */
+
+    for(int i = 0; i < size; i++)  {
+        vector<Cell> v;
+        for(int i = 0; i < size; i++) {
+                v.push_back(Cell(cost));
+        }
+        grid.push_back(v);
+    }
+    
 }
 
 void Enviroment::set(int numUsers, int numIncent) {
@@ -164,10 +174,21 @@ Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
         userList.push_back(User());
     }
 
+    for(int i = 0; i < numIncent; i++) {
+        taskList.push_back(SensingTask(i+1, preBudget/((float) numIncent)));
+    }
 
 }
 
 void Game::set() {
+    /* 
+    * set outline:
+    *   - place all users and incentives in some cells
+    * 
+    */
+
+    random_shuffle
+    
 
 }
 

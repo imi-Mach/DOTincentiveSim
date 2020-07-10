@@ -3,6 +3,7 @@
 
 #include "functions.hpp"
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -62,8 +63,8 @@ class Enviroment {
         Cell* getCell(int, int);    /* parameter desc: x coord and y coord for entity placement */
         ~Enviroment();
     private:
-        vector< vector<Cell> > *grid;      /* c): 2d map of cells */
         int size;                         /* c): */
+        vector< vector<Cell> > grid;      /* c): 2d map of cells */
 
 };
 
