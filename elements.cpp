@@ -1,7 +1,14 @@
 #include "elements.hpp"
 
-Cell::Cell(int travelCost) {
-    int cost = travelCost;
+Cell::Cell() {
+    int cost = NULL;
+}
+
+void Cell::set(int geoCost){
+    cost = geoCost;
+    if (!entityVector.empty()) {
+        entityVector.clear();
+    }
 }
 
 void Cell::addEntity(Entity* enteringEntity) {
@@ -77,8 +84,7 @@ int Entity::getCoord(const char component) {
         default:
 
     }
-    bail(2, "Incorrect use of getCoord function");
-    cerr << "FATAL error: getCoord failed to return coord or error!" << endl;
+    bail(2, "FATAL error: getCoord failed to return coord or error!");
     return -2;
 }
 
@@ -92,8 +98,14 @@ User::User() {
     accReward = 0.0;
 }
 
-void User::set(int x, int y) {
-    
+void User::set(int x_pos, int y_pos) {
+    SID       = 0;
+    x         = x_pos;
+    y         = y_pos;
+    opTime    = 0;
+    opCost    = 0;
+    distance  = 0;
+    accReward = 0.0;
 }
 
 int User::selectSID(SensingTask *sensingTaskList) {
@@ -122,17 +134,44 @@ SensingTask::~SensingTask() {
 }
 
 Enviroment::Enviroment(int size) { 
+    geoSetting = UNIFORM;
 
-    int cost = 1; /* cost for traveling into a cell */
+    vector<Cell> v;
 
+    for(int i = 0; i < size; i++) {
+        v.push_back(Cell());
+    }
+
+    for(int i = 0; i < size; i++) {
+        grid.push_back(v);
+    }
+
+    /*
     for(int i = 0; i < size; i++)  {
         vector<Cell> v;
-        for(int i = 0; i < size; i++) {
-                v.push_back(Cell(cost));
+        for(int j = 0; j < size; j++) {
+                v.push_back(Cell());
         }
         grid.push_back(v);
     }
+    */
     
+}
+
+int Enviroment::assignCost(int x, int y) {
+    switch(geoSetting) {
+        case UNIFORM:  /* only case programmed */
+            return 1;
+        case SIMPLE:
+            return 1;
+        case COMPLEX:
+            return 1;
+        case RANDOM:
+            return 1;
+    }
+
+    bail(2, "FATAL error: Geo cost was not properly set");
+    return 1;
 }
 
 void Enviroment::set(int numUsers, int numIncent) {
@@ -144,7 +183,18 @@ void Enviroment::placeEntity(Entity* newEntity) {
 }
 
 Cell* Enviroment::getCell(int x, int y) {
+    
+    Cell* cp;
 
+    try {
+        cp = &grid[x][y];
+    }
+    catch (const std::out_of_range& oor) {
+        cerr << "Out of Range error (getCell: size = " << size << ", x = " << x << ", y = " << y << "): " << oor.what() << endl;
+        exit(2);
+    }
+
+    return cp;
 }
 
 Enviroment::~Enviroment() {
@@ -181,13 +231,28 @@ Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
 }
 
 void Game::set() {
-    /* 
-    * set outline:
-    *   - place all users and incentives in some cells
-    * 
-    */
+    
+    srand(time(0));
 
-    random_shuffle
+    int x = NULL;
+    int y = NULL;
+    vector<Entity*>* entityList; /* ptr to local entity list in cell */
+    Cell* cp  = nullptr; /* cell ptr */
+    
+
+    for(int i = 0; i < boardSize; i++) {
+        for(int j = 0; j < boardSize; j++) {
+            board->getCell(i,j)->set(board->assignCost(i, j));
+        }
+    }
+
+    for(int i = 0; i < totalUsers; i++) {
+        x = rand() % boardSize;
+        y = rand() % boardSize;
+        if (board->
+    }
+    
+    
     
 
 }

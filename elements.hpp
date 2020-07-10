@@ -4,12 +4,16 @@
 #include "functions.hpp"
 #include <vector>
 #include <algorithm>
+#include <cstdlib>
+#include <ctime>
+#include <stdexcept>
 
 using namespace std;
 
 class Cell {
     public:
-        Cell(int);
+        Cell();
+        void set(int);
         void addEntity(Entity*);                  /* parameter desc: add new entity pointer to cell's occupany list*/
         void delEntity(Entity*);                  /* parameter desc: */
         vector<Entity*>* getEntityVector();       /* parameter desc: */
@@ -55,14 +59,23 @@ class SensingTask : public Entity {
 
 };
 
+enum boardType {
+    UNIFORM,
+    SIMPLE,
+    COMPLEX,
+    RANDOM
+};
+
 class Enviroment {
     public:
         Enviroment(int);            /* parameter desc: sideLength of square board */
+        int assignCost(int, int);    /* parameter desc: assign geo cost based on x-y coords */
         void set(int, int);         /* parameter desc: num of users, num of incentives */
         void placeEntity(Entity*);  /* parameter desc: reference for entity to assign to cell */
         Cell* getCell(int, int);    /* parameter desc: x coord and y coord for entity placement */
         ~Enviroment();
     private:
+        boardType geoSetting;
         int size;                         /* c): */
         vector< vector<Cell> > grid;      /* c): 2d map of cells */
 
@@ -72,7 +85,7 @@ enum gameStatus {
     CONSTRUCTION,
     INPROGRESS,
     COMPLETE,
-    USERSFAILED,
+    USERSFAILED
 };
 
 class Game {
