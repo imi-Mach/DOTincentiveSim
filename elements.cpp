@@ -2,49 +2,62 @@
 
 Cell::Cell() {
     int cost = NULL;
+    sensingTask = nullptr;
 }
 
 void Cell::set(int geoCost){
     cost = geoCost;
-    if (!entityVector.empty()) {
-        entityVector.clear();
+    if (!resVec.empty()) {
+        resVec.clear();
     }
 }
 
-void Cell::addEntity(Entity* enteringEntity) {
+void Cell::setTask(SensingTask* task) {
+    sensingTask = task;
+}
+
+void Cell::addUser(User* newUser) {
     
     int size;
     int i;
 
     /* empty vector case */
-    if(entityVector.empty()) {
-        entityVector.push_back(enteringEntity);
+    if(resVec.empty()) {
+        resVec.push_back(newUser);
         return;
     }
 
-    size = entityVector.size();
+    size = resVec.size();
 
     /* scan through vector for NULL pointers */
     for(i = 0; i < size; i++) {
-        if(entityVector[i] == nullptr) {
-            entityVector[i] = enteringEntity;
+        if(resVec[i] == nullptr) {
+            resVec[i] = newUser;
             return;
         }
     }
 
     /* vector is full, add another container */
-    entityVector.push_back(enteringEntity);
+    resVec.push_back(newUser);
 
 }
 
-void Cell::delEntity(Entity* leavingEntity) {
-    int size = entityVector.size();
+void Cell::delUser(User* leavingUser) {
+    int size = resVec.size();
     for(int i = 0; i < size; i++) {
-        if(entityVector[i] == leavingEntity) {
-            entityVector[i] = nullptr;
+        if(resVec[i] == leavingUser) {
+            resVec[i] = nullptr;
             return;
         }
     }
+}
+
+SensingTask* Cell::getTask() {
+    return sensingTask;
+}
+
+vector<User*>* Cell::getResVec() {
+    return &resVec;
 }
 
 Cell::~Cell() {
@@ -174,12 +187,12 @@ int Enviroment::assignCost(int x, int y) {
     return 1;
 }
 
-void Enviroment::set(int numUsers, int numIncent) {
-
-}
-
-void Enviroment::placeEntity(Entity* newEntity) {
-
+void Enviroment::set() {
+    for(int i = 0; i < size; i++) {
+        for(int j = 0; j < size; j++) {
+            grid[i][j].set(assignCost(i, j));
+        }
+    }
 }
 
 Cell* Enviroment::getCell(int x, int y) {
@@ -234,26 +247,40 @@ void Game::set() {
     
     srand(time(0));
 
+    Cell* cp;
+
     int x = NULL;
     int y = NULL;
-    vector<Entity*>* entityList; /* ptr to local entity list in cell */
-    Cell* cp  = nullptr; /* cell ptr */
     
-
-    for(int i = 0; i < boardSize; i++) {
-        for(int j = 0; j < boardSize; j++) {
-            board->getCell(i,j)->set(board->assignCost(i, j));
-        }
-    }
+    board->set();
 
     for(int i = 0; i < totalUsers; i++) {
         x = rand() % boardSize;
         y = rand() % boardSize;
-        if (board->
+
+        cp = board->getCell(x,y);
+
+        if (!cp->getResVec()->empty()) {
+            i--;
+            continue;
+        }
+        userList[i].set(x,y);
+        cp->addUser(&userList[i]);
     }
-    
-    
-    
+
+    for(int i = 0; i < totalIncentives; i++) {
+        x = rand() % boardSize;
+        y = rand() % boardSize;
+
+        cp = board->getCell(x,y);
+
+        if (cp->getTask() != nullptr) {
+            i--;
+            continue;
+        }
+        taskList[i].set(x,y);
+        cp->setTask(&taskList[i]);
+    }
 
 }
 

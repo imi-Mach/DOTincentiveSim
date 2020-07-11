@@ -14,19 +14,22 @@ class Cell {
     public:
         Cell();
         void set(int);
-        void addEntity(Entity*);                  /* parameter desc: add new entity pointer to cell's occupany list*/
-        void delEntity(Entity*);                  /* parameter desc: */
-        vector<Entity*>* getEntityVector();       /* parameter desc: */
+        void setTask(SensingTask*);
+        void addUser(User*);                  /* parameter desc: add new entity pointer to cell's occupany list*/
+        void delUser(User*);                  /* parameter desc: */
+        SensingTask* getTask();
+        vector<User*>* getResVec();       /* parameter desc: */
         ~Cell();
     private:
         int cost;                                 /* var desc: cost of moving cell to cell  */
-        vector<Entity*> entityVector;             /* var desc: occupancy list */
+        SensingTask* sensingTask;
+        vector<User*> resVec;             /* var desc: resident list */
 };
 
 class Entity {
     public:
         void setCoord(const char, int);
-        int getCoord(const char);
+        int  getCoord(const char);
     protected:
         int SID;            /* set(): */
         int x;
@@ -68,11 +71,10 @@ enum boardType {
 
 class Enviroment {
     public:
-        Enviroment(int);            /* parameter desc: sideLength of square board */
-        int assignCost(int, int);    /* parameter desc: assign geo cost based on x-y coords */
-        void set(int, int);         /* parameter desc: num of users, num of incentives */
-        void placeEntity(Entity*);  /* parameter desc: reference for entity to assign to cell */
-        Cell* getCell(int, int);    /* parameter desc: x coord and y coord for entity placement */
+        Enviroment(int);                /* parameter desc: sideLength of square board */
+        int assignCost(int, int);       /* parameter desc: assign geo cost based on x-y coords */
+        void set();                     /* parameter desc:  */
+        Cell* getCell(int, int);        /* parameter desc: x coord and y coord for entity placement */
         ~Enviroment();
     private:
         boardType geoSetting;
