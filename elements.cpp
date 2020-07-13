@@ -125,7 +125,7 @@ void User::set(int x_pos, int y_pos) {
     accReward = 0.0;
 }
 
-int User::selectSID(SensingTask *sensingTaskList) {
+int User::selectSID(vector<SensingTask*>* sensingTaskList) {
     
 }
 
@@ -233,39 +233,48 @@ Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
 
     User* up;
     SensingTask* stp;
+    vector<User*> userVec;
+    vector<SensingTask*> taskVec;
 
-    state = CONSTRUCTION;
-    totalTime = 0;
-    totalIncentives = numIncent;
-    totalUsers = numUser;
-    boardSize = size;
-    preBudget = predictedBudget;
+    state               = CONSTRUCTION;
+    totalTime           = 0;
+    totalIncentives     = numIncent;
+    totalUsers          = numUser;
+    totalDrops          = 0;
+    finishedIncentives  = 0;
+    boardSize           = size;
+    preBudget           = predictedBudget;
+    userList            = &userVec;
+    taskList            = &taskVec;
 
     board = new Enviroment(boardSize);
 
     for(int i = 0; i < numUser; i++) {
         up = new User();
-        userList.push_back(up);
-        up = nullptr;
+        userList->push_back(up);
+        delete up;
     }
 
     for(int i = 0; i < numIncent; i++) {
         stp = new SensingTask(i+1, preBudget/((float) numIncent));
-        taskList.push_back(stp);
-        stp = nullptr;
+        taskList->push_back(stp);
+        delete stp;
     }
 
 }
 
 void Game::set() {
-    
+
+    state               = INPROGRESS;
+    totalTime           = 0;
+    totalDrops          = 0;
+    finishedIncentives  = 0;
+    int x               = NULL;
+    int y               = NULL;
+    Cell* cp            = nullptr;
+
     srand(time(0));
 
-    Cell* cp;
-
-    int x = NULL;
-    int y = NULL;
-    
     board->set();
 
     for(int i = 0; i < totalUsers; i++) {   /* possible infinte loop if x and y fail to be random */
@@ -278,8 +287,8 @@ void Game::set() {
             i--;
             continue;
         }
-        userList[i]->set(x,y);
-        cp->addUser(userList[i]);
+        (*userList)[i]->set(x,y);
+        cp->addUser((*userList)[i]);
     }
 
     for(int i = 0; i < totalIncentives; i++) { /* possible infinte loop if x and y fail to be random */
@@ -292,8 +301,8 @@ void Game::set() {
             i--;
             continue;
         }
-        taskList[i]->set(x,y);
-        cp->setTask(taskList[i]);
+        (*taskList)[i]->set(x,y);
+        cp->setTask((*taskList)[i]);
     }
 
 }
@@ -306,17 +315,39 @@ void Game::play() {
     *       -players can move on to the same space
     *   - game ends if there are only unavaliable users
     */
-    
+
     auto rng = default_random_engine {};
+    int  SID = NULL;
 
     while(state == INPROGRESS) {
-        shuffle(userList.begin(), userList.end(), rng); /* users are randomized */
-        for(int i = 0; i < totalUsers; i++) {
-            if(userList[i]->getSID() == 0) {
-                userList[i]->selectSID(&taskList);
+        shuffle((*userList).begin(), (*userList).end(), rng); /* users are randomized */
+
+        for(int i = 0; i < totalUsers; i++) {           /* go through each user and update available users */
+            
+            SID = (*userList)[i]->getSID();
+
+            if(SID == 0) {                              /* if SID == 0, then user goes through task selection process */
+                (*userList)[i]->selectSID(taskList);
+                i--;
+                continue;
+            }
+            else if(SID > 0) {                          /* if SID > 0, then user moves. */
+                movUser((*userList)[i]);
             }
         }
 
+        if(totalDrops == totalUsers) {
+            if(finishedIncentives == totalIncentives) {
+                state = COMPLETE;
+            }
+            else if(finishedIncentives < totalIncentives) {
+                state = USERSFAILED;
+            }
+            else {
+                bail(3, "FATAL error: game state attepted to change undefined state.");
+            }
+        }
+        /* end loop by updating loop condtion: state */
     }
 
 }
@@ -329,11 +360,11 @@ void Game::reset() {
 
 }
 
-void Game::movUser(User* movingUser, Cell* oldCell, Cell* newCell) {
+void Game::movUser(User* movingUser) {
     
 }
 
 Game::~Game() {
-    userList.clear();
-    taskList.clear();
+    (*userList).clear();
+    (*taskList).clear();
 }

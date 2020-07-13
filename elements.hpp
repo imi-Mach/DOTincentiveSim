@@ -99,17 +99,19 @@ class Game {
         void play();      /* play game */
         void save();
         void reset();
-        void movUser(User*, Cell*, Cell*);          /* parameter desc: user moving, source, destination */
+        void movUser(User*);          /* parameter desc: user moving, source, destination */
     private:
         gameStatus state;
         int totalTime;
         int totalIncentives;
         int totalUsers;
+        int totalDrops;
+        int finishedIncentives;
         int boardSize;
         float preBudget;
-        Enviroment *board;
-        vector<User*> userList;            /* c): */
-        vector<SensingTask*> taskList;     /* c): */
+        Enviroment* board;
+        vector<User*>* userList;            /* c): */
+        vector<SensingTask*>* taskList;     /* c): */
 
 };
 
