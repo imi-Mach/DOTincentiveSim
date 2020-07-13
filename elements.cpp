@@ -300,7 +300,7 @@ void Game::set() {
 
 void Game::play() {
     /*
-    * Outline:
+    * Outline:add
     *   - at start, all users are randomly selected to select sensing task (shuffle)
     *   - each turn updates board stats
     *       -players can move on to the same space

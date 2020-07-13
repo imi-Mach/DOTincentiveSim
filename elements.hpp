@@ -31,6 +31,7 @@ class Entity {
     public:
         void setCoord(const char, int);
         int  getCoord(const char);
+        int  getSID();
     protected:
         int SID;            /* set(): */
         int x;
@@ -42,7 +43,7 @@ class User : public Entity {
     public:
         User();                             /* construct phase:  */
         void set(int, int);
-        int  selectSID(SensingTask *);      /* decide what the SID is */
+        int  selectSID(vector<SensingTask*>*);      /* decide what the SID is */
         ~User();
     private:
         int opTime;         /* set(): */
