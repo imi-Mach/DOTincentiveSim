@@ -3,7 +3,8 @@
 
 #include "functions.hpp"
 #include <vector>
-#include <algorithm>
+#include <algorithm> /* shuffle algorithm */
+#include <random>    /* seed + generator for shuffle */
 #include <cstdlib>
 #include <ctime>
 #include <stdexcept>
@@ -18,12 +19,12 @@ class Cell {
         void addUser(User*);                  /* parameter desc: add new entity pointer to cell's occupany list*/
         void delUser(User*);                  /* parameter desc: */
         SensingTask* getTask();
-        vector<User*>* getResVec();       /* parameter desc: */
+        vector<User*>* getResVec();           /* parameter desc: */
         ~Cell();
     private:
-        int cost;                                 /* var desc: cost of moving cell to cell  */
+        int cost;                             /* var desc: cost of moving cell to cell  */
         SensingTask* sensingTask;
-        vector<User*> resVec;             /* var desc: resident list */
+        vector<User*> resVec;                 /* var desc: resident list */
 };
 
 class Entity {
@@ -106,8 +107,8 @@ class Game {
         int boardSize;
         float preBudget;
         Enviroment *board;
-        vector<User> userList;            /* c): */
-        vector<SensingTask> taskList;     /* c): */
+        vector<User*> userList;            /* c): */
+        vector<SensingTask*> taskList;     /* c): */
 
 };
 

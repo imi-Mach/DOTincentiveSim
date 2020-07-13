@@ -101,6 +101,10 @@ int Entity::getCoord(const char component) {
     return -2;
 }
 
+int Entity::getSID() {
+    return SID;
+}
+
 User::User() {
     SID       = 0;
     x         = -1;
@@ -135,11 +139,14 @@ SensingTask::SensingTask(int indexSID, float incentive) {
     y           = -1;
     status      = false;
     reward      = incentive;
-    participant = NULL;
+    participant = nullptr;
 }
 
 void SensingTask::set(int x, int y) {
-    
+    x           = x;
+    y           = y;
+    status      = false;
+    participant = nullptr;
 }
 
 SensingTask::~SensingTask() {
@@ -173,7 +180,7 @@ Enviroment::Enviroment(int size) {
 
 int Enviroment::assignCost(int x, int y) {
     switch(geoSetting) {
-        case UNIFORM:  /* only case programmed */
+        case UNIFORM:       /* only case programmed */
             return 1;
         case SIMPLE:
             return 1;
@@ -224,6 +231,9 @@ Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
     *       - set of sensing tasks constructed and pointed to
     */
 
+    User* up;
+    SensingTask* stp;
+
     state = CONSTRUCTION;
     totalTime = 0;
     totalIncentives = numIncent;
@@ -234,11 +244,15 @@ Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
     board = new Enviroment(boardSize);
 
     for(int i = 0; i < numUser; i++) {
-        userList.push_back(User());
+        up = new User();
+        userList.push_back(up);
+        up = nullptr;
     }
 
     for(int i = 0; i < numIncent; i++) {
-        taskList.push_back(SensingTask(i+1, preBudget/((float) numIncent)));
+        stp = new SensingTask(i+1, preBudget/((float) numIncent));
+        taskList.push_back(stp);
+        stp = nullptr;
     }
 
 }
@@ -254,7 +268,7 @@ void Game::set() {
     
     board->set();
 
-    for(int i = 0; i < totalUsers; i++) {
+    for(int i = 0; i < totalUsers; i++) {   /* possible infinte loop if x and y fail to be random */
         x = rand() % boardSize;
         y = rand() % boardSize;
 
@@ -264,22 +278,22 @@ void Game::set() {
             i--;
             continue;
         }
-        userList[i].set(x,y);
-        cp->addUser(&userList[i]);
+        userList[i]->set(x,y);
+        cp->addUser(userList[i]);
     }
 
-    for(int i = 0; i < totalIncentives; i++) {
+    for(int i = 0; i < totalIncentives; i++) { /* possible infinte loop if x and y fail to be random */
         x = rand() % boardSize;
         y = rand() % boardSize;
 
         cp = board->getCell(x,y);
 
-        if (cp->getTask() != nullptr) {
+        if (cp->getTask() != nullptr) {  /* add condition to check if resList is empty to relate both */
             i--;
             continue;
         }
-        taskList[i].set(x,y);
-        cp->setTask(&taskList[i]);
+        taskList[i]->set(x,y);
+        cp->setTask(taskList[i]);
     }
 
 }
@@ -292,8 +306,18 @@ void Game::play() {
     *       -players can move on to the same space
     *   - game ends if there are only unavaliable users
     */
+    
+    auto rng = default_random_engine {};
 
-   
+    while(state == INPROGRESS) {
+        shuffle(userList.begin(), userList.end(), rng); /* users are randomized */
+        for(int i = 0; i < totalUsers; i++) {
+            if(userList[i]->getSID() == 0) {
+                userList[i]->selectSID(&taskList);
+            }
+        }
+
+    }
 
 }
 
