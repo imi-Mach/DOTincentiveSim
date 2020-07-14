@@ -130,7 +130,10 @@ void User::set(int x_pos, int y_pos) {
 }
 
 int User::selectSID(vector<SensingTask*>* sensingTaskList) {
-    
+    /* 
+     * User Selection Process + Dropout scheme:
+     * 
+     */
 }
 
 void User::update(int cost, int distanceRemaing, int x_new, int y_new) {
@@ -335,50 +338,55 @@ int Game::step(User* movingUser,Cell* oldCell, const char option) {
 
 void Game::movUser(User* movingUser) {
 
-    int cost;
-    SensingTask* stp;
-    stp = (*taskList)[movingUser->getSID()];
+    int cost;                                   /* cost of moving cell to cell */
+    SensingTask* stp;                           /* sensingtask gives objective destination */
+    stp = (*taskList)[movingUser->getSID()];    /* sensingtask is given by user */
 
+    /* store x&y coords of user in local variables */
     int x_o = movingUser->getCoord('x');
     int y_o = movingUser->getCoord('y');
 
+    /* store x&y coords of task in local variables */
     int x_f = stp->getCoord('x');
     int y_f = stp->getCoord('y');
 
+    /* x&y displacement relative to the user and task */
     int x_d = x_f - x_o;
     int y_d = y_f - y_o;
 
-    if(abs(x_d) >= abs(y_d)) {
+    /* bias to move based on larger x or y displacement to reduce allocation in cells */
+    if(abs(x_d) >= abs(y_d)) {                                      /* move in x direction */
         if(x_d > 0) {
-            cost = step(movingUser, board->getCell(x_o,y_o), 'r');
+            cost = step(movingUser, board->getCell(x_o,y_o), 'r');  /* move right */
             movingUser->update(cost, x_d + y_d - 1, x_o+1, y_o);
             x_o += 1;
         }
         else if(x_d < 0) {
-            cost = step(movingUser, board->getCell(x_o,y_o), 'l');
+            cost = step(movingUser, board->getCell(x_o,y_o), 'l');  /* move left */
             movingUser->update(cost, x_d + y_d - 1, x_o-1, y_o);
             x_o -= 1;
         }
-        else if((x_d == 0) && (y_d == 0)){
+        else if((x_d == 0) && (y_d == 0)){                          /* case if user starts on incentive */
             capture(movingUser);
             movUser(movingUser);
             x_f = -1;
             y_f = -1;
         }
     }
-    else if (abs(x_d) < abs(y_d)) {
+    else if (abs(x_d) < abs(y_d)) {                                 /* move in y direction */
         if(y_d > 0) {
-            cost = step(movingUser, board->getCell(x_o,y_o), 'u');
+            cost = step(movingUser, board->getCell(x_o,y_o), 'u');  /* move up */
             movingUser->update(cost, x_d + y_d - 1, x_o, y_o+1);
             y_o += 1;
         }
         else if(y_d < 0) {
-            cost = step(movingUser, board->getCell(x_o,y_o), 'd');
+            cost = step(movingUser, board->getCell(x_o,y_o), 'd');  /* move down */
             movingUser->update(cost, x_d + y_d - 1, x_o, y_o-1);
             y_o -= 1;
         }
     }
 
+    /* check if user moved onto their incentive */
     if((x_o == x_f) && (y_o == y_f)) {
         capture(movingUser);
     }

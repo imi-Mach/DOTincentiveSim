@@ -45,8 +45,8 @@ class User : public Entity {
         User();                             /* construct phase:  */
         void set(int, int);
         int  selectSID(vector<SensingTask*>*);      /* decide what the SID is */
-        void update(int, int, int, int);
-        void update(int, float);
+        void update(int, int, int, int);            /* move update */
+        void update(int, float);                    /* incentive capture update */
         ~User();
     private:
         int opTime;         /* set(): */
