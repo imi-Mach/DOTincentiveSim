@@ -3,8 +3,8 @@
 
 #include "functions.hpp"
 #include <vector>
-#include <algorithm> /* shuffle algorithm */
-#include <random>    /* seed + generator for shuffle */
+#include <algorithm>        /* shuffle algorithm */
+#include <random>           /* seed + generator for shuffle */
 #include <cstdlib>
 #include <ctime>
 #include <stdexcept>
@@ -42,11 +42,11 @@ class Entity {
 
 class User : public Entity {
     public:
-        User();                             /* construct phase:  */
+        User();                                                     /* construct phase:  */
         void set(int, int);
-        int  selectSID(vector<SensingTask*>*);      /* decide what the SID is */
-        void update(int, int, int, int);            /* move update */
-        void update(int, float);                    /* incentive capture update */
+        void selectSID(Enviroment*, vector<SensingTask*>*, int);    /* decide what the SID is */
+        void update(int, int, int, int);                            /* move update */
+        void update(int, float);                                    /* incentive capture update */
         ~User();
     private:
         int opTime;         /* set(): */
@@ -61,6 +61,7 @@ class SensingTask : public Entity {
         void set(int, int);
         void update(bool, User*);
         float getReward();
+        User *getUser();
         ~SensingTask();
     private:
         bool status;                /* c): true = finished, false = not finished */
@@ -80,11 +81,13 @@ class Enviroment {
     public:
         Enviroment(int);                /* parameter desc: sideLength of square board */
         int assignCost(int, int);       /* parameter desc: assign geo cost based on x-y coords */
+        int getAvgCost();
         void set();                     /* parameter desc:  */
         Cell* getCell(int, int);        /* parameter desc: x coord and y coord for entity placement */
         ~Enviroment();
     private:
         boardType geoSetting;
+        int avgCost;
         int size;                         /* c): */
         vector< vector<Cell> > grid;      /* c): 2d map of cells */
 
@@ -99,14 +102,13 @@ enum gameStatus {
 
 class Game {
     public:
-        Game(int, int, int, float);                 /* constructs enviroment -> constructs users and sensing tasks */
+        Game(int, int, int, float);     /* constructs enviroment -> constructs users and sensing tasks */
         void capture(User*);
-        int step(User*, Cell*, char);
-        void movUser(User*);          /* parameter desc: user moving, source, destination */
-        void set();         /* reset board to inital conditions */
-        void play();      /* play game */
+        int  step(User*, Cell*, char);
+        void movUser(User*);            /* parameter desc: user moving, source, destination */
+        void set();                     /* reset board to inital conditions */
+        void play();                    /* play game */
         void save();
-        void reset();
     private:
         gameStatus state;
         int totalTime;

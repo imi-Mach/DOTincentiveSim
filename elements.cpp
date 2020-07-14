@@ -129,11 +129,77 @@ void User::set(int x_pos, int y_pos) {
     accReward = 0.0;
 }
 
-int User::selectSID(vector<SensingTask*>* sensingTaskList) {
+void User::selectSID(Enviroment* board, vector<SensingTask*>* sensingTaskList, int numTasks) {
     /* 
      * User Selection Process + Dropout scheme:
-     * 
+     *  - look through each incentive and calculate predicted net marginal profit
+     *  - 10% net profit margin threshold
+     *  - (net profit margin %) = 100% * (profit) / (accReward)
+     *                          = 100% * (reward - preCost) / (accReard)
+     *  - use max value to find best option based on proximity (simple case)
+     *  - if best option is lower than 10%, then the user drops
      */
+
+    SensingTask* stp;
+    int x_f;
+    int y_f;
+    int x_abs;
+    int y_abs;
+    int avgCost;        /* for more complex boards, this variable would need changing */
+    int newSID;
+    float temp_reward;
+    float max_reward;
+    float temp_profit;
+    float max_profit;
+    float nmp_thres; /* minimum acceptable net marginal profit threshold for user to accept task */
+    float nmp;
+
+    avgCost = board->getAvgCost();
+    newSID = -1;
+    temp_reward = 0;
+    max_reward = 0;
+    temp_profit = 0;
+    max_profit = 0;
+
+    for(int i = 0; i < numTasks; i++) {
+        if((*sensingTaskList)[i]->getUser() == nullptr) {
+            stp = (*sensingTaskList)[i];
+            x_f = stp->getCoord('x');
+            y_f = stp->getCoord('y');
+            x_abs = abs(x_f - x);
+            y_abs = abs(y_f - y);
+            temp_reward = stp->getReward();
+            temp_profit = temp_reward - (float)((x_abs + y_abs) * avgCost);
+
+            if(temp_profit > max_profit) {
+                max_reward = temp_reward;
+                newSID = stp->getSID();
+            }
+
+        }
+
+    }
+
+    if(newSID == -1) {
+        SID = -1;
+        return;
+    }
+
+    if(accReward > 0) {
+        nmp = 100.0 * max_profit / accReward;
+    }
+    else if(accReward == 0) {
+        nmp = 100.0 * max_profit / max_reward;
+    }
+
+    if (nmp_thres < nmp) {
+        SID = -1;
+        return;
+    }
+
+    update(newSID, 0);
+    (*sensingTaskList)[newSID]->update(false, this);
+
 }
 
 void User::update(int cost, int distanceRemaing, int x_new, int y_new) {
@@ -144,8 +210,8 @@ void User::update(int cost, int distanceRemaing, int x_new, int y_new) {
     y         = y_new;
 }
 
-void User::update(int SID, float reward) {
-    SID = 0;
+void User::update(int newSID, float reward) {
+    SID = newSID;
     accReward += reward;
 
 }
@@ -177,6 +243,10 @@ void SensingTask::update(bool statusChange, User *userParticipant) {
 
 float SensingTask::getReward() {
     return reward;
+}
+
+User* SensingTask::getUser() {
+    return participant;
 }
 
 SensingTask::~SensingTask() {
@@ -222,6 +292,10 @@ int Enviroment::assignCost(int x, int y) {
 
     bail(2, "FATAL error: Geo cost was not properly set");
     return 1;
+}
+
+int Enviroment::getAvgCost() {
+    return avgCost;
 }
 
 void Enviroment::set() {
@@ -442,21 +516,23 @@ void Game::play() {
 
     auto rng = default_random_engine {};
     int  SID = NULL;
+    User *up = nullptr; /* user pointer */
 
     while(state == INPROGRESS) {
         shuffle((*userList).begin(), (*userList).end(), rng); /* users are randomized */
 
         for(int i = 0; i < totalUsers; i++) {           /* go through each user and update available users */
             
-            SID = (*userList)[i]->getSID();
+            up = (*userList)[i];
+            SID = up->getSID();
 
             if(SID == 0) {                              /* if SID == 0, then user goes through task selection process */
-                (*userList)[i]->selectSID(taskList);
+                up->selectSID(board, taskList, totalIncentives);
                 i--;
                 continue;
             }
             else if(SID > 0) {                          /* if SID > 0, then user moves. */
-                movUser((*userList)[i]);
+                movUser(up);
             }
         }
 
@@ -478,11 +554,7 @@ void Game::play() {
 }
 
 void Game::save() {
-
-}
-
-void Game::reset() {
-
+    
 }
 
 
