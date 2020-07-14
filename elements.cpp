@@ -197,7 +197,7 @@ void User::selectSID(Enviroment* board, vector<SensingTask*>* sensingTaskList, i
         return;
     }
 
-    update(newSID, 0);
+    SID = newSID;
     (*sensingTaskList)[newSID]->update(false, this);
 
 }
@@ -214,6 +214,18 @@ void User::update(int newSID, float reward) {
     SID = newSID;
     accReward += reward;
 
+}
+
+int User::getOpTime() {
+    return opTime;
+}
+
+int User:: getOpCost() {
+    return opCost;
+}
+
+float User::getAccReward() {
+    return accReward;
 }
 
 User::~User() {
@@ -239,6 +251,10 @@ void SensingTask::set(int x, int y) {
 void SensingTask::update(bool statusChange, User *userParticipant) {
     status = statusChange;
     participant = userParticipant;
+}
+
+bool SensingTask::getStatus() {
+    return status;
 }
 
 float SensingTask::getReward() {
@@ -341,6 +357,7 @@ Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
     vector<SensingTask*> taskVec;
 
     state               = CONSTRUCTION;
+    trialNum            = 0;
     totalTime           = 0;
     totalIncentives     = numIncent;
     totalUsers          = numUser;
@@ -468,8 +485,8 @@ void Game::movUser(User* movingUser) {
 
 }
 
-void Game::set() {
-
+void Game::set(int round) {
+    trialNum = round;
     state               = INPROGRESS;
     totalTime           = 0;
     totalDrops          = 0;
@@ -553,9 +570,83 @@ void Game::play() {
 
 }
 
-void Game::save() {
-    
-    
+void Game::save(ofstream* dataFile) {
+
+    string finGameState;
+
+    /* enviroment info */
+    int avgCostCell     = board->getAvgCost();
+
+    /* user info */
+    User *up            = nullptr;
+    int sumOpTime       = 0;
+    int sumOpCost       = 0;
+    float sumAccReward  = 0.0;
+
+    /* sensing task info */
+    SensingTask *stp    = nullptr;
+    int remainSTs       = 0;
+    float missedRewards = 0.0;
+
+    /* Data file info */
+    const int gamestat_width = 6;
+    const int intVal_width = 8;
+    const int fltVal_width = 10;
+    const int num_flds = 9 ;
+    const string sep = " |" ;
+    const int total_width = intVal_width*6 + gamestat_width + fltVal_width*2 + sep.size() * num_flds ;
+    const string line = sep + std::string( total_width-1, '-' ) + '|' ;
+
+    if(state == COMPLETE) {
+        finGameState = "COMP";
+    }
+    else if(state == USERSFAILED) {
+        finGameState = "FAIL";
+    }
+    else {
+        finGameState = "ERR";
+    }
+
+    for(int i = 0; i < totalUsers; i++) {
+        up = (*userList)[i];
+        sumOpTime    += up->getOpTime();
+        sumOpCost    += up->getOpTime();
+        sumAccReward += up->getAccReward();
+    }
+
+    remainSTs = 0;
+    missedRewards = 0;
+
+    for(int i = 0; i < totalIncentives; i++) {
+        stp = (*taskList)[i];
+        if(!stp->getStatus()) {
+            missedRewards = stp->getReward();
+            remainSTs++;
+        }
+    }
+
+    /*
+     * Print order:
+     *  - Game details: trialNum, gamestate, totalTime, avgCostCell, sumOpTime, sumOpCost, sumAccReward, remainSTs, missedRewards
+     * 
+     */
+
+    if(trialNum == 1) {
+        *dataFile << line << '\n' << sep
+              << setw(intVal_width) << "Trial #" << sep << setw(gamestat_width) << "Result" << sep
+              << setw(intVal_width) << "Sim Time" << sep << setw(intVal_width) << "AVG cost" << sep
+              << setw(intVal_width) << "OP cost" << sep << setw(fltVal_width) << "Rewards($)" << sep
+              << setw(intVal_width) << "ST Left" << sep << setw(fltVal_width) << "Surplus($)" << sep
+              << '\n' << line << '\n' ;
+    }
+
+    *dataFile << line << '\n' << sep
+              << setw(intVal_width) << trialNum << sep << setw(gamestat_width) << finGameState << sep
+              << setw(intVal_width) << totalTime << sep << setw(intVal_width) << avgCostCell << sep
+              << setw(intVal_width) << sumOpCost << sep<< fixed << setprecision(2) << setw(fltVal_width) << sumAccReward << sep
+              << setw(intVal_width) << remainSTs << sep << setw(fltVal_width) << missedRewards << sep
+              << '\n' << line << '\n' ;
+
 }
 
 

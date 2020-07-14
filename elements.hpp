@@ -8,6 +8,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <stdexcept>
+#include <fstream>
+
 
 using namespace std;
 
@@ -43,10 +45,13 @@ class Entity {
 class User : public Entity {
     public:
         User();                                                     /* construct phase:  */
-        void set(int, int);
-        void selectSID(Enviroment*, vector<SensingTask*>*, int);    /* decide what the SID is */
-        void update(int, int, int, int);                            /* move update */
-        void update(int, float);                                    /* incentive capture update */
+        void  set(int, int);
+        void  selectSID(Enviroment*, vector<SensingTask*>*, int);    /* decide what the SID is */
+        void  update(int, int, int, int);                            /* move update */
+        void  update(int, float);                                    /* incentive capture update */
+        int   getOpTime();
+        int   getOpCost();
+        float getAccReward();
         ~User();
     private:
         int opTime;         /* set(): */
@@ -60,6 +65,7 @@ class SensingTask : public Entity {
         SensingTask(int, float);    /* construct phase: */
         void set(int, int);
         void update(bool, User*);
+        bool  getStatus();
         float getReward();
         User *getUser();
         ~SensingTask();
@@ -106,11 +112,12 @@ class Game {
         void capture(User*);
         int  step(User*, Cell*, char);
         void movUser(User*);            /* parameter desc: user moving, source, destination */
-        void set();                     /* reset board to inital conditions */
+        void set(int);                     /* reset board to inital conditions */
         void play();                    /* play game */
-        void save();
+        void save(ofstream*);
     private:
         gameStatus state;
+        int trialNum;
         int totalTime;
         int totalIncentives;
         int totalUsers;

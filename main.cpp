@@ -13,12 +13,15 @@ int main(int argc, char **argv) {
     
     cout << string(50, '\n') << endl;
 
+    ofstream dataFile;
     int   trials;
     int   numIncent;
     int   userNum;
     int   boardSize;
     float preBudget;  /* optimize problem with numIncentives */
     float percent;
+
+    dataFile.open("data.txt");
 
     int   round = 1;
 
@@ -28,12 +31,22 @@ int main(int argc, char **argv) {
     
     Game game(numIncent, userNum, boardSize, preBudget);    /* constructing phase */
 
+    dataFile << "Number of Trials:\t" << trials
+             << "\nBoard Size: \t\t" << boardSize << "x" << boardSize
+             << "\nPredicted budget:\t" << preBudget
+             << "\nPercentage: \t\t" << percent
+             << "\nNumber of Users:\t" << userNum
+             << "\nNumber of tasks:\t" << numIncent
+             << '\n';
+
     while(trials >= round) {
-        game.set();            /* set non-static variables to start */
+        game.set(round);            /* set non-static variables to start */
         game.play();           /* turn based game, ends when users all dropout */
-        game.save();           /* print results into a file the results */
+        game.save(&dataFile);           /* print results into a file the results */
         round++;
     }
     
+    dataFile.close();
+
     return 0;
 }
