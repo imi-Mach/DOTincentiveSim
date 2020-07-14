@@ -52,6 +52,10 @@ void Cell::delUser(User* leavingUser) {
     }
 }
 
+int Cell::getCost(){
+    return cost;
+}
+
 SensingTask* Cell::getTask() {
     return sensingTask;
 }
@@ -129,6 +133,20 @@ int User::selectSID(vector<SensingTask*>* sensingTaskList) {
     
 }
 
+void User::update(int cost, int distanceRemaing, int x_new, int y_new) {
+    opTime   += 1;
+    opCost   += cost;
+    distance  = distanceRemaing;
+    x         = x_new;
+    y         = y_new;
+}
+
+void User::update(int SID, float reward) {
+    SID = 0;
+    accReward += reward;
+
+}
+
 User::~User() {
 
 }
@@ -147,6 +165,15 @@ void SensingTask::set(int x, int y) {
     y           = y;
     status      = false;
     participant = nullptr;
+}
+
+void SensingTask::update(bool statusChange, User *userParticipant) {
+    status = statusChange;
+    participant = userParticipant;
+}
+
+float SensingTask::getReward() {
+    return reward;
 }
 
 SensingTask::~SensingTask() {
@@ -263,6 +290,102 @@ Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
 
 }
 
+void Game::capture(User* user) {
+    int SID;
+    SensingTask* stp;
+
+    SID = user->getSID();
+    stp =(*taskList)[SID];
+
+    user->update(0, stp->getReward());
+    stp->update(true, user);
+
+}
+
+int Game::step(User* movingUser,Cell* oldCell, const char option) {
+    Cell* cp = nullptr;
+    switch(option) {
+        case 'l':
+            oldCell->delUser(movingUser);
+            cp = board->getCell(movingUser->getCoord('x')-1, movingUser->getCoord('y'));
+            cp->addUser(movingUser);
+            return cp->getCost();
+            break;
+        case 'r':
+            oldCell->delUser(movingUser);
+            cp = board->getCell(movingUser->getCoord('x')+1, movingUser->getCoord('y'));
+            cp->addUser(movingUser);
+            return cp->getCost();
+            break;
+        case 'u':
+            oldCell->delUser(movingUser);
+            cp = board->getCell(movingUser->getCoord('x'), movingUser->getCoord('y')+1);
+            cp->addUser(movingUser);
+            return cp->getCost();
+            break;
+        case 'd':
+        oldCell->delUser(movingUser);
+            cp = board->getCell(movingUser->getCoord('x'), movingUser->getCoord('y')-1);
+            cp->addUser(movingUser);
+            return cp->getCost();
+            break;
+    }
+    
+}
+
+void Game::movUser(User* movingUser) {
+
+    int cost;
+    SensingTask* stp;
+    stp = (*taskList)[movingUser->getSID()];
+
+    int x_o = movingUser->getCoord('x');
+    int y_o = movingUser->getCoord('y');
+
+    int x_f = stp->getCoord('x');
+    int y_f = stp->getCoord('y');
+
+    int x_d = x_f - x_o;
+    int y_d = y_f - y_o;
+
+    if(abs(x_d) >= abs(y_d)) {
+        if(x_d > 0) {
+            cost = step(movingUser, board->getCell(x_o,y_o), 'r');
+            movingUser->update(cost, x_d + y_d - 1, x_o+1, y_o);
+            x_o += 1;
+        }
+        else if(x_d < 0) {
+            cost = step(movingUser, board->getCell(x_o,y_o), 'l');
+            movingUser->update(cost, x_d + y_d - 1, x_o-1, y_o);
+            x_o -= 1;
+        }
+        else if((x_d == 0) && (y_d == 0)){
+            capture(movingUser);
+            movUser(movingUser);
+            x_f = -1;
+            y_f = -1;
+        }
+    }
+    else if (abs(x_d) < abs(y_d)) {
+        if(y_d > 0) {
+            cost = step(movingUser, board->getCell(x_o,y_o), 'u');
+            movingUser->update(cost, x_d + y_d - 1, x_o, y_o+1);
+            y_o += 1;
+        }
+        else if(y_d < 0) {
+            cost = step(movingUser, board->getCell(x_o,y_o), 'd');
+            movingUser->update(cost, x_d + y_d - 1, x_o, y_o-1);
+            y_o -= 1;
+        }
+    }
+
+    if((x_o == x_f) && (y_o == y_f)) {
+        capture(movingUser);
+    }
+
+
+}
+
 void Game::set() {
 
     state               = INPROGRESS;
@@ -308,13 +431,6 @@ void Game::set() {
 }
 
 void Game::play() {
-    /*
-    * Outline:add
-    *   - at start, all users are randomly selected to select sensing task (shuffle)
-    *   - each turn updates board stats
-    *       -players can move on to the same space
-    *   - game ends if there are only unavaliable users
-    */
 
     auto rng = default_random_engine {};
     int  SID = NULL;
@@ -347,7 +463,8 @@ void Game::play() {
                 bail(3, "FATAL error: game state attepted to change undefined state.");
             }
         }
-        /* end loop by updating loop condtion: state */
+        
+        totalTime++;
     }
 
 }
@@ -360,9 +477,6 @@ void Game::reset() {
 
 }
 
-void Game::movUser(User* movingUser) {
-    
-}
 
 Game::~Game() {
     (*userList).clear();

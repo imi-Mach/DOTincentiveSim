@@ -18,6 +18,7 @@ class Cell {
         void setTask(SensingTask*);
         void addUser(User*);                  /* parameter desc: add new entity pointer to cell's occupany list*/
         void delUser(User*);                  /* parameter desc: */
+        int getCost();
         SensingTask* getTask();
         vector<User*>* getResVec();           /* parameter desc: */
         ~Cell();
@@ -44,6 +45,8 @@ class User : public Entity {
         User();                             /* construct phase:  */
         void set(int, int);
         int  selectSID(vector<SensingTask*>*);      /* decide what the SID is */
+        void update(int, int, int, int);
+        void update(int, float);
         ~User();
     private:
         int opTime;         /* set(): */
@@ -56,6 +59,8 @@ class SensingTask : public Entity {
     public:
         SensingTask(int, float);    /* construct phase: */
         void set(int, int);
+        void update(bool, User*);
+        float getReward();
         ~SensingTask();
     private:
         bool status;                /* c): true = finished, false = not finished */
@@ -95,11 +100,13 @@ enum gameStatus {
 class Game {
     public:
         Game(int, int, int, float);                 /* constructs enviroment -> constructs users and sensing tasks */
+        void capture(User*);
+        int step(User*, Cell*, char);
+        void movUser(User*);          /* parameter desc: user moving, source, destination */
         void set();         /* reset board to inital conditions */
         void play();      /* play game */
         void save();
         void reset();
-        void movUser(User*);          /* parameter desc: user moving, source, destination */
     private:
         gameStatus state;
         int totalTime;
