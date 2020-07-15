@@ -1,40 +1,70 @@
 CXX=g++
-CFLAGS=-g -c -Wall -Wextra -Wwrite-strings
+CFLAGS=-g -std=c++11 -Wall -Wextra -Wwrite-strings -c
 LFLAGS=-g
-INCLUDE_OBJECTS=-I./objects/
-INCLUDE_CFUNCS=-I./cfunctions/
 
-sim1: main.o Cell.o Entity.o User.o SensingTask.o Enviroment.o Game.o functions.o
-	${CXX} ${LFLAGS} -o sim1 main.o Cell.o Entity.o User.o SensingTask.o Enviroment.o Game.o functions.o
+BUILD_DIR ?= ./build
+SRC_DIRS ?= ./src
 
-main.o: main.cpp
-	${CXX} ${CFLAGS} ${INCLUDE_OBJECTS} ${INCLUDE_CFUNCS} main.cpp
+SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+DEPS := $(OBJS:.o=.d)
 
-Cell.o: Cell.cpp Cell.hpp
-	${CXX} ${CFLAGS} ${INCLUDE_OBJECTS} Cell.cpp
+INC_DIRS := $(shell find $(SRC_DIRS) -type d)
+INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
-Entity.o: Entity.cpp Entity.hpp
-	${CXX} ${CFLAGS} ${INCLUDE_OBJECTS} Entity.cpp
+CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
-User.o: User.cpp User.hpp
-	${CXX} ${CFLAGS} ${INCLUDE_OBJECTS} User.cpp
+$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
+	$(CC) $(OBJS) -o $@ $(LFLAGS)
 
-SensingTask.o: SensingTask.cpp SensingTask.hpp
-	${CXX} ${CFLAGS} ${INCLUDE_OBJECTS} SensingTask.cpp
+# assembly
+$(BUILD_DIR)/%.s.o: %.s
+	$(MKDIR_P) $(dir $@)
+	$(AS) $(ASFLAGS) -c $< -o $@
 
-Enviroment.o: Enviroment.cpp Enviroment.hpp
-	${CXX} ${CFLAGS} ${INCLUDE_OBJECTS} Enviroment.cpp
+# c source
+$(BUILD_DIR)/%.c.o: %.c
+	$(MKDIR_P) $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-Game.o: Game.cpp Game.hpp
-	${CXX} ${CFLAGS} ${INCLUDE_OBJECTS} Game.cpp
+# c++ source
+$(BUILD_DIR)/%.cpp.o: %.cpp
+	$(MKDIR_P) $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-functions.o: functions.hpp functions.cpp
-	${CXX} ${CFLAGS} ${INCLUDE_CFUNCS} functions.cpp
+
+.PHONY: clean
 
 clean:
-	rm -f *.o
-	rm -f sim1
+	$(RM) -r $(BUILD_DIR)
 
-clear:
-	clear
-	make
+-include $(DEPS)
+
+MKDIR_P ?= mkdir -p
+
+#sim1: main.o Cell.o Entity.o User.o SensingTask.o Enviroment.o Game.o functions.o \
+	${CXX} ${LFLAGS} -o sim1 main.o Cell.o Entity.o User.o SensingTask.o Enviroment.o Game.o functions.o\
+\
+main.o: main.cpp \
+	${CXX} ${INCLUDES} ${CFLAGS} main.cpp\
+\
+Cell.o: Cell.cpp Cell.hpp\
+	${CXX} ${INCLUDES} ${CFLAGS} Cell.cpp\
+\
+Entity.o: Entity.cpp Entity.hpp\
+	${CXX} ${INCLUDES} ${CFLAGS} Entity.cpp\
+\
+User.o: User.cpp User.hpp\
+	${CXX} ${INCLUDES} ${CFLAGS} User.cpp\
+\
+SensingTask.o: SensingTask.cpp SensingTask.hpp\
+	${CXX} ${INCLUDES} ${CFLAGS} SensingTask.cpp\
+\
+Enviroment.o: Enviroment.cpp Enviroment.hpp\
+	${CXX} ${INCLUDES} ${CFLAGS} Enviroment.cpp\
+\
+Game.o: Game.cpp Game.hpp\
+	${CXX} ${INCLUDES} ${CFLAGS} Game.cpp\
+\
+functions.o: functions.hpp functions.cpp\
+	${CXX} ${INCLUDES} ${CFLAGS} functions.cpp
