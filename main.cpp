@@ -1,7 +1,8 @@
 #include <iostream>
 #include <cmath>
-#include "elements.hpp"
-#include "functions.hpp"
+#include "fstream"
+#include "Game.hpp"
+#include "functions.h"
 
 /* 
  * To-Do's:
