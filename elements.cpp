@@ -673,6 +673,5 @@ Game::~Game() {
     }
     taskList->clear();
     delete taskList;
-
     
 }

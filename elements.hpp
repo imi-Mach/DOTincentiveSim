@@ -2,8 +2,8 @@
 #define ELEMENTS
 
 #include "functions.hpp"
-#include <vector>
-#include <algorithm>        /* shuffle algorithm */
+#include <vector>           /* 2-d grid of cells, user, and sensing task vectors */
+#include <algorithm>        /* shuffle algorithm for random user selection*/
 #include <random>           /* seed + generator for shuffle */
 #include <cstdlib>
 #include <ctime>
