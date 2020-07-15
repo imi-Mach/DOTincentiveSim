@@ -3,6 +3,14 @@
 #include "elements.hpp"
 #include "functions.hpp"
 
+/* 
+ * To-Do's:
+ *  - finish deconstructors (mem deletes)
+ *  - fix make file to compile elements.cpp and link to main
+ *  - debug (many bugs, mem loss, frees ...)
+ *
+ */
+
 /* how many users do we need? */
 /* assuming square board */
 /* how do we know what percentage is eco feasible? */

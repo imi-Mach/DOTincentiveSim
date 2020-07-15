@@ -1,14 +1,15 @@
 #include "elements.hpp"
 
 Cell::Cell() {
+    resVec = new vector<User*>;
     int cost = NULL;
     sensingTask = nullptr;
 }
 
 void Cell::set(int geoCost){
     cost = geoCost;
-    if (!resVec.empty()) {
-        resVec.clear();
+    if (!resVec->empty()) {
+        resVec->clear();
     }
 }
 
@@ -22,31 +23,31 @@ void Cell::addUser(User* newUser) {
     int i;
 
     /* empty vector case */
-    if(resVec.empty()) {
-        resVec.push_back(newUser);
+    if(resVec->empty()) {
+        resVec->push_back(newUser);
         return;
     }
 
-    size = resVec.size();
+    size = resVec->size();
 
     /* scan through vector for NULL pointers */
     for(i = 0; i < size; i++) {
-        if(resVec[i] == nullptr) {
-            resVec[i] = newUser;
+        if((*resVec)[i] == nullptr) {
+            (*resVec)[i] = newUser;
             return;
         }
     }
 
     /* vector is full, add another container */
-    resVec.push_back(newUser);
+    resVec->push_back(newUser);
 
 }
 
 void Cell::delUser(User* leavingUser) {
-    int size = resVec.size();
+    int size = resVec->size();
     for(int i = 0; i < size; i++) {
-        if(resVec[i] == leavingUser) {
-            resVec[i] = nullptr;
+        if((*resVec)[i] == leavingUser) {
+            (*resVec)[i] = nullptr;
             return;
         }
     }
@@ -61,11 +62,12 @@ SensingTask* Cell::getTask() {
 }
 
 vector<User*>* Cell::getResVec() {
-    return &resVec;
+    return resVec;
 }
 
 Cell::~Cell() {
-
+    resVec->clear();
+    delete resVec;
 }
 
 void Entity::setCoord(const char component, int posVal) {
@@ -129,7 +131,7 @@ void User::set(int x_pos, int y_pos) {
     accReward = 0.0;
 }
 
-void User::selectSID(Enviroment* board, vector<SensingTask*>* sensingTaskList, int numTasks) {
+void User::selectSID(Enviroment* board, vector<SensingTask>* sensingTaskList, int numTasks) {
     /* 
      * User Selection Process + Dropout scheme:
      *  - look through each incentive and calculate predicted net marginal profit
@@ -162,8 +164,8 @@ void User::selectSID(Enviroment* board, vector<SensingTask*>* sensingTaskList, i
     max_profit = 0;
 
     for(int i = 0; i < numTasks; i++) {
-        if((*sensingTaskList)[i]->getUser() == nullptr) {
-            stp = (*sensingTaskList)[i];
+        if((*sensingTaskList)[i].getUser() == nullptr) {
+            stp = &(*sensingTaskList)[i];
             x_f = stp->getCoord('x');
             y_f = stp->getCoord('y');
             x_abs = abs(x_f - x);
@@ -198,7 +200,7 @@ void User::selectSID(Enviroment* board, vector<SensingTask*>* sensingTaskList, i
     }
 
     SID = newSID;
-    (*sensingTaskList)[newSID]->update(false, this);
+    (*sensingTaskList)[newSID].update(false, this);
 
 }
 
@@ -270,8 +272,10 @@ SensingTask::~SensingTask() {
 }
 
 Enviroment::Enviroment(int size) { 
+    
+    grid = new vector< vector<Cell> >;
+    
     geoSetting = UNIFORM;
-
     vector<Cell> v;
 
     for(int i = 0; i < size; i++) {
@@ -279,7 +283,7 @@ Enviroment::Enviroment(int size) {
     }
 
     for(int i = 0; i < size; i++) {
-        grid.push_back(v);
+        grid->push_back(v);
     }
 
     /*
@@ -317,7 +321,7 @@ int Enviroment::getAvgCost() {
 void Enviroment::set() {
     for(int i = 0; i < size; i++) {
         for(int j = 0; j < size; j++) {
-            grid[i][j].set(assignCost(i, j));
+            (*grid)[i][j].set(assignCost(i, j));
         }
     }
 }
@@ -327,7 +331,7 @@ Cell* Enviroment::getCell(int x, int y) {
     Cell* cp;
 
     try {
-        cp = &grid[x][y];
+        cp = &(*grid)[x][y];
     }
     catch (const std::out_of_range& oor) {
         cerr << "Out of Range error (getCell: size = " << size << ", x = " << x << ", y = " << y << "): " << oor.what() << endl;
@@ -338,7 +342,14 @@ Cell* Enviroment::getCell(int x, int y) {
 }
 
 Enviroment::~Enviroment() {
-
+    for(int i = 0; i < size; i++) {
+        for(int j = 0; j < size; j++) {
+            (*grid)[i][j].~Cell();
+        }
+        (*grid)[i].clear();
+    }
+    grid->clear();
+    delete grid;
 }
 
 Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
@@ -353,8 +364,6 @@ Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
 
     User* up;
     SensingTask* stp;
-    vector<User*> userVec;
-    vector<SensingTask*> taskVec;
 
     state               = CONSTRUCTION;
     trialNum            = 0;
@@ -365,21 +374,18 @@ Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
     finishedIncentives  = 0;
     boardSize           = size;
     preBudget           = predictedBudget;
-    userList            = &userVec;
-    taskList            = &taskVec;
+
+    userList            = new vector<User>;
+    taskList            = new vector<SensingTask>;
 
     board = new Enviroment(boardSize);
 
     for(int i = 0; i < numUser; i++) {
-        up = new User();
-        userList->push_back(up);
-        delete up;
+        userList->push_back(User());
     }
 
     for(int i = 0; i < numIncent; i++) {
-        stp = new SensingTask(i+1, preBudget/((float) numIncent));
-        taskList->push_back(stp);
-        delete stp;
+        taskList->push_back(SensingTask(i+1, preBudget/((float) numIncent)));
     }
 
 }
@@ -389,7 +395,7 @@ void Game::capture(User* user) {
     SensingTask* stp;
 
     SID = user->getSID();
-    stp =(*taskList)[SID];
+    stp = &(*taskList)[SID];
 
     user->update(0, stp->getReward());
     stp->update(true, user);
@@ -431,7 +437,7 @@ void Game::movUser(User* movingUser) {
 
     int cost;                                   /* cost of moving cell to cell */
     SensingTask* stp;                           /* sensingtask gives objective destination */
-    stp = (*taskList)[movingUser->getSID()];    /* sensingtask is given by user */
+    stp = &(*taskList)[movingUser->getSID()];    /* sensingtask is given by user */
 
     /* store x&y coords of user in local variables */
     int x_o = movingUser->getCoord('x');
@@ -509,8 +515,8 @@ void Game::set(int round) {
             i--;
             continue;
         }
-        (*userList)[i]->set(x,y);
-        cp->addUser((*userList)[i]);
+        (*userList)[i].set(x,y);
+        cp->addUser(&(*userList)[i]);
     }
 
     for(int i = 0; i < totalIncentives; i++) { /* possible infinte loop if x and y fail to be random */
@@ -523,8 +529,8 @@ void Game::set(int round) {
             i--;
             continue;
         }
-        (*taskList)[i]->set(x,y);
-        cp->setTask((*taskList)[i]);
+        (*taskList)[i].set(x,y);
+        cp->setTask(&(*taskList)[i]);
     }
 
 }
@@ -540,7 +546,7 @@ void Game::play() {
 
         for(int i = 0; i < totalUsers; i++) {           /* go through each user and update available users */
             
-            up = (*userList)[i];
+            up = &(*userList)[i];
             SID = up->getSID();
 
             if(SID == 0) {                              /* if SID == 0, then user goes through task selection process */
@@ -572,6 +578,7 @@ void Game::play() {
 
 void Game::save(ofstream* dataFile) {
 
+    /* game info */
     string finGameState;
 
     /* enviroment info */
@@ -608,7 +615,7 @@ void Game::save(ofstream* dataFile) {
     }
 
     for(int i = 0; i < totalUsers; i++) {
-        up = (*userList)[i];
+        up = &(*userList)[i];
         sumOpTime    += up->getOpTime();
         sumOpCost    += up->getOpTime();
         sumAccReward += up->getAccReward();
@@ -618,7 +625,7 @@ void Game::save(ofstream* dataFile) {
     missedRewards = 0;
 
     for(int i = 0; i < totalIncentives; i++) {
-        stp = (*taskList)[i];
+        stp = &(*taskList)[i];
         if(!stp->getStatus()) {
             missedRewards = stp->getReward();
             remainSTs++;
@@ -651,6 +658,21 @@ void Game::save(ofstream* dataFile) {
 
 
 Game::~Game() {
-    (*userList).clear();
-    (*taskList).clear();
+
+    board->~Enviroment();
+    delete board;
+
+    for(int i = 0; i < totalUsers; i++) {
+        (*userList)[i].~User();
+    }
+    userList->clear();
+    delete userList;
+
+    for(int i = 0; i < totalIncentives; i++) {
+        (*taskList)[i].~SensingTask();
+    }
+    taskList->clear();
+    delete taskList;
+
+    
 }

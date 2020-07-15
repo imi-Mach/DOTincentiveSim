@@ -9,7 +9,8 @@
 #include <ctime>
 #include <stdexcept>
 #include <fstream>
-
+#include <string>
+#include <iomanip>
 
 using namespace std;
 
@@ -18,7 +19,7 @@ class Cell {
         Cell();
         void set(int);
         void setTask(SensingTask*);
-        void addUser(User*);                  /* parameter desc: add new entity pointer to cell's occupany list*/
+        void addUser(User*);                  /* parameter desc: */
         void delUser(User*);                  /* parameter desc: */
         int getCost();
         SensingTask* getTask();
@@ -27,7 +28,7 @@ class Cell {
     private:
         int cost;                             /* var desc: cost of moving cell to cell  */
         SensingTask* sensingTask;
-        vector<User*> resVec;                 /* var desc: resident list */
+        vector<User*>* resVec;                 /* var desc: resident list */
 };
 
 class Entity {
@@ -46,7 +47,7 @@ class User : public Entity {
     public:
         User();                                                     /* construct phase:  */
         void  set(int, int);
-        void  selectSID(Enviroment*, vector<SensingTask*>*, int);    /* decide what the SID is */
+        void  selectSID(Enviroment*, vector<SensingTask>*, int);    /* decide what the SID is */
         void  update(int, int, int, int);                            /* move update */
         void  update(int, float);                                    /* incentive capture update */
         int   getOpTime();
@@ -63,14 +64,14 @@ class User : public Entity {
 class SensingTask : public Entity {
     public:
         SensingTask(int, float);    /* construct phase: */
-        void set(int, int);
-        void update(bool, User*);
+        void  set(int, int);
+        void  update(bool, User*);
         bool  getStatus();
         float getReward();
         User *getUser();
         ~SensingTask();
     private:
-        bool status;                /* c): true = finished, false = not finished */
+        bool  status;                /* c): true = finished, false = not finished */
         float reward;               /* c): */
         User *participant;          /* c): */
 
@@ -95,7 +96,7 @@ class Enviroment {
         boardType geoSetting;
         int avgCost;
         int size;                         /* c): */
-        vector< vector<Cell> > grid;      /* c): 2d map of cells */
+        vector< vector<Cell> >* grid;      /* c): 2d map of cells */
 
 };
 
@@ -126,8 +127,8 @@ class Game {
         int boardSize;
         float preBudget;
         Enviroment* board;
-        vector<User*>* userList;            /* c): */
-        vector<SensingTask*>* taskList;     /* c): */
+        vector<User>* userList;            /* c): */
+        vector<SensingTask>* taskList;     /* c): */
 
 };
 
