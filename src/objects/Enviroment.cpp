@@ -2,20 +2,19 @@
 
 Enviroment::Enviroment(int size) { 
     
-    grid = new vector< vector<Cell> >;
-    
     geoSetting = UNIFORM;
     vector<Cell> v;
-
+    
     for(int i = 0; i < size; i++) {
         v.push_back(Cell());
+        
     }
-
+    
     for(int i = 0; i < size; i++) {
-        grid->push_back(v);
+        grid.push_back(v);
     }
 
-    /*
+    /* DEBUG STAGE: 
     for(int i = 0; i < size; i++)  {
         vector<Cell> v;
         for(int j = 0; j < size; j++) {
@@ -50,7 +49,7 @@ int Enviroment::getAvgCost() {
 void Enviroment::set() {
     for(int i = 0; i < size; i++) {
         for(int j = 0; j < size; j++) {
-            (*grid)[i][j].set(assignCost(i, j));
+            grid[i][j].set(assignCost(i, j));
         }
     }
 }
@@ -60,7 +59,7 @@ Cell* Enviroment::getCell(int x, int y) {
     Cell* cp;
 
     try {
-        cp = &(*grid)[x][y];
+        cp = &grid[x][y];
     }
     catch (const std::out_of_range& oor) {
         cerr << "Out of Range error (getCell: size = " << size << ", x = " << x << ", y = " << y << "): " << oor.what() << endl;
@@ -73,10 +72,10 @@ Cell* Enviroment::getCell(int x, int y) {
 Enviroment::~Enviroment() {
     for(int i = 0; i < size; i++) {
         for(int j = 0; j < size; j++) {
-            (*grid)[i][j].~Cell();
+            grid[i][j].~Cell();
         }
-        (*grid)[i].clear();
+        grid[i].clear();
     }
-    grid->clear();
-    delete grid;
+    grid.clear();
+    
 }

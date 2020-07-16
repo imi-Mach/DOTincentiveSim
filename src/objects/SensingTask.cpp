@@ -9,9 +9,9 @@ SensingTask::SensingTask(int indexSID, float incentive) {
     participant = nullptr;
 }
 
-void SensingTask::set(int x, int y) {
-    x           = x;
-    y           = y;
+void SensingTask::set(int x_pos, int y_pos) {
+    x           = x_pos;
+    y           = y_pos;
     status      = false;
     participant = nullptr;
 }

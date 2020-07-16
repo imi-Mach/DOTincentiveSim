@@ -11,6 +11,7 @@ using namespace std;
 void parseArgs(int, char **, int *, int *, int *, float *, float *);
 bool isNumber(string);
 bool isFloat(string);
+int  rng(int);
 void help(void);
 void bail(int, string);
 #endif

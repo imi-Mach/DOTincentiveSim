@@ -3,7 +3,6 @@
 using namespace std;
 
 void parseArgs(int argc, char **argv, int *trials, int *userNum, int *boardSize, float *preBudget, float *percent) {
-
     if (argc == 11) {
         if ((strcmp(argv[3], "-b") || strcmp(argv[3], "--board")) && isNumber(argv[4])) {
             *boardSize = atoi(argv[4]);
@@ -15,7 +14,7 @@ void parseArgs(int argc, char **argv, int *trials, int *userNum, int *boardSize,
 
         if ((strcmp(argv[1], "-u") || strcmp(argv[1], "--user")) && isNumber(argv[2])) {
             *userNum = atoi(argv[2]);
-            if (*userNum > *boardSize) help();
+            if (*userNum > *boardSize * *boardSize) help();
         }
         else {
             help();
@@ -64,6 +63,10 @@ bool isFloat(string myString) {
     iss >> noskipws >> f;
     return iss.eof() && !iss.fail();
     
+}
+
+int rng(int i) {
+    return rand()%i;
 }
 
 void help(void) {

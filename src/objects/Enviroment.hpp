@@ -26,7 +26,7 @@ class Enviroment {
         boardType geoSetting;
         int avgCost;
         int size;                         /* c): */
-        vector< vector<Cell> >* grid;      /* c): 2d map of cells */
+        vector< vector<Cell> > grid;      /* c): 2d map of cells */
 
 };
 

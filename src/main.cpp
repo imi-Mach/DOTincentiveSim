@@ -20,8 +20,8 @@ using namespace std;
 
 int main(int argc, char **argv) {
     
-    cout << string(50, '\n') << endl;
-
+    //cout << string(50, '\n') << endl;
+    
     ofstream dataFile;
     int   trials;
     int   numIncent;
@@ -39,18 +39,19 @@ int main(int argc, char **argv) {
     numIncent = (int)floor(((float)(boardSize * boardSize) * percent / 100));
     
     Game game(numIncent, userNum, boardSize, preBudget);    /* constructing phase */
-
+    
     dataFile << "Number of Trials:\t" << trials
              << "\nBoard Size: \t\t" << boardSize << "x" << boardSize
              << "\nPredicted budget:\t" << preBudget
              << "\nPercentage: \t\t" << percent
              << "\nNumber of Users:\t" << userNum
              << "\nNumber of tasks:\t" << numIncent
-             << '\n';
-
+             << endl;
+    
     while(trials >= round) {
         game.set(round);            /* set non-static variables to start */
         game.play();           /* turn based game, ends when users all dropout */
+        cout << "\n\n\n-----------------------GAME.PLAY WORKED!!!" << endl;
         game.save(&dataFile);           /* print results into a file the results */
         round++;
     }

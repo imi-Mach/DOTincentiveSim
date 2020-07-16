@@ -1,15 +1,15 @@
 #include "Cell.hpp"
 
 Cell::Cell() {
-    resVec = new vector<User*>;
+    /* DEBUG STAGE: resVec = new vector<User*>; */
     cost = 1;                   /* default is 1 */
     sensingTask = nullptr;
 }
 
 void Cell::set(int geoCost){
     cost = geoCost;
-    if (!resVec->empty()) {
-        resVec->clear();
+    if (!resVec.empty()) {
+        resVec.clear();
     }
 }
 
@@ -23,31 +23,31 @@ void Cell::addUser(User* newUser) {
     int i;
 
     /* empty vector case */
-    if(resVec->empty()) {
-        resVec->push_back(newUser);
+    if(resVec.empty()) {
+        resVec.push_back(newUser);
         return;
     }
 
-    size = resVec->size();
+    size = resVec.size();
 
     /* scan through vector for NULL pointers */
     for(i = 0; i < size; i++) {
-        if((*resVec)[i] == nullptr) {
-            (*resVec)[i] = newUser;
+        if(resVec[i] == nullptr) {
+            resVec[i] = newUser;
             return;
         }
     }
 
     /* vector is full, add another container */
-    resVec->push_back(newUser);
+    resVec.push_back(newUser);
 
 }
 
 void Cell::delUser(User* leavingUser) {
-    int size = resVec->size();
+    int size = resVec.size();
     for(int i = 0; i < size; i++) {
-        if((*resVec)[i] == leavingUser) {
-            (*resVec)[i] = nullptr;
+        if(resVec[i] == leavingUser) {
+            resVec[i] = nullptr;
             return;
         }
     }
@@ -62,10 +62,14 @@ SensingTask* Cell::getTask() {
 }
 
 vector<User*>* Cell::getResVec() {
-    return resVec;
+    return &resVec;
 }
 
 Cell::~Cell() {
-    resVec->clear();
-    delete resVec;
+    /* DEBUG STAGE: cout<<"\n\nCHECK\n" << endl;
+    if(resVec) {
+        resVec.clear();
+        delete resVec;
+    }
+    */
 }

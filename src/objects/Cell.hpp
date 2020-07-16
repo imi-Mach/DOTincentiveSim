@@ -22,7 +22,7 @@ class Cell {
     private:
         int cost;                             /* var desc: cost of moving cell to cell  */
         SensingTask* sensingTask;
-        vector<User*>* resVec;                 /* var desc: resident list */
+        vector<User*> resVec;                 /* var desc: resident list */
 };
 
 #endif

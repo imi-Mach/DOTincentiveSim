@@ -2,17 +2,16 @@
 
 Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
     /*
-    * Game constructor:
-    *   - Responsible for initializing all variables
-    *       - local variables intialized
-    *       - enviroment constructed and pointed to
-    *       - set of users constructed and pointed to
-    *       - set of sensing tasks constructed and pointed to
-    */
+     * Game constructor:
+     *   - Responsible for initializing all variables
+     *       - local variables intialized
+     *       - enviroment constructed and pointed to
+     *       - set of users constructed and pointed to
+     *       - set of sensing tasks constructed and pointed to
+     */
 
-    User* up;
-    SensingTask* stp;
-
+    srand(time(0));
+    
     state               = CONSTRUCTION;
     trialNum            = 0;
     totalTime           = 0;
@@ -22,31 +21,16 @@ Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
     finishedIncentives  = 0;
     boardSize           = size;
     preBudget           = predictedBudget;
-
-    userList            = new vector<User>;
-    taskList            = new vector<SensingTask>;
-
+    
     board = new Enviroment(boardSize);
-
+    
     for(int i = 0; i < numUser; i++) {
-        userList->push_back(User());
+        userList.push_back(User());
     }
 
     for(int i = 0; i < numIncent; i++) {
-        taskList->push_back(SensingTask(i+1, preBudget/((float) numIncent)));
+        taskList.push_back(SensingTask(i+1, preBudget/((float) numIncent)));
     }
-
-}
-
-void Game::capture(User* user) {
-    int SID;
-    SensingTask* stp;
-
-    SID = user->getSID();
-    stp = &(*taskList)[SID];
-
-    user->update(0, stp->getReward());
-    stp->update(true, user);
 
 }
 
@@ -83,11 +67,23 @@ int Game::step(User* movingUser,Cell* oldCell, const char option) {
     
 }
 
+void Game::capture(User* user) {
+    int SID;
+    SensingTask* stp;
+
+    SID = user->getSID();
+    stp = &taskList[SID];
+
+    user->update(0, stp->getReward());
+    stp->update(true, user);
+
+}
+
 void Game::movUser(User* movingUser) {
 
-    int cost;                                   /* cost of moving cell to cell */
-    SensingTask* stp;                           /* sensingtask gives objective destination */
-    stp = &(*taskList)[movingUser->getSID()];    /* sensingtask is given by user */
+    int cost;                                    /* cost of moving cell to cell */
+    SensingTask* stp;                            /* sensingtask gives objective destination */
+    stp = &taskList[movingUser->getSID()];    /* sensingtask is given by user */
 
     /* store x&y coords of user in local variables */
     int x_o = movingUser->getCoord('x');
@@ -138,11 +134,10 @@ void Game::movUser(User* movingUser) {
         capture(movingUser);
     }
 
-
 }
 
 void Game::set(int round) {
-    trialNum = round;
+    trialNum            = round;
     state               = INPROGRESS;
     totalTime           = 0;
     totalDrops          = 0;
@@ -150,28 +145,26 @@ void Game::set(int round) {
     int x               = -1;
     int y               = -1;
     Cell* cp            = nullptr;
-
-    srand(time(0));
-
+    
     board->set();
 
     for(int i = 0; i < totalUsers; i++) {   /* possible infinte loop if x and y fail to be random */
-        x = rand() % boardSize;
-        y = rand() % boardSize;
-
+        x = rng(boardSize);
+        y = rng(boardSize);
+        
         cp = board->getCell(x,y);
-
+        
         if (!cp->getResVec()->empty()) {
             i--;
             continue;
         }
-        (*userList)[i].set(x,y);
-        cp->addUser(&(*userList)[i]);
+        userList[i].set(x,y);
+        cp->addUser(&userList[i]);
     }
-
+    
     for(int i = 0; i < totalIncentives; i++) { /* possible infinte loop if x and y fail to be random */
-        x = rand() % boardSize;
-        y = rand() % boardSize;
+        x = rng(boardSize);
+        y = rng(boardSize);
 
         cp = board->getCell(x,y);
 
@@ -179,28 +172,51 @@ void Game::set(int round) {
             i--;
             continue;
         }
-        (*taskList)[i].set(x,y);
-        cp->setTask(&(*taskList)[i]);
+        taskList[i].set(x,y);
+        cp->setTask(&taskList[i]);
+    }
+    
+    /* DEBUG Printing 
+    cout << '\n';
+    for(int i = 0; i < boardSize; i++) {
+        for(int j = 0; j < boardSize; j++) {
+            cout << board->getCell(i,j)->getCost() << " ";
+        }
+        cout << endl;
     }
 
+    cout << '\n';
+
+    for(int i = 0; i < totalUsers; i++) {
+        cout << "User[" << i << "] (x,y) = " << userList[i].getCoord('x') << ", " << userList[i].getCoord('y') << '\n';
+    }
+
+    cout << '\n';
+
+    for(int i = 0; i < totalIncentives; i++) {
+        cout << "Task[" << i << "] (x,y) = " << taskList[i].getCoord('x') << ", " << taskList[i].getCoord('y') << '\n';
+    }
+    */
 }
 
 void Game::play() {
+    
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    auto rng = default_random_engine(seed);
 
-    auto rng = default_random_engine {};
-    int  SID = NULL;
+    int  SID;
     User *up = nullptr; /* user pointer */
-
+    
     while(state == INPROGRESS) {
-        shuffle((*userList).begin(), (*userList).end(), rng); /* users are randomized */
-
+        shuffle(userList.begin(), userList.end(), rng); /* users are randomized */
+        
         for(int i = 0; i < totalUsers; i++) {           /* go through each user and update available users */
             
-            up = &(*userList)[i];
+            up = &userList[i];
             SID = up->getSID();
 
             if(SID == 0) {                              /* if SID == 0, then user goes through task selection process */
-                up->selectSID(board, taskList, totalIncentives);
+                up->selectSID(board, &taskList, totalIncentives);
                 i--;
                 continue;
             }
@@ -208,7 +224,7 @@ void Game::play() {
                 movUser(up);
             }
         }
-
+        
         if(totalDrops == totalUsers) {
             if(finishedIncentives == totalIncentives) {
                 state = COMPLETE;
@@ -265,7 +281,7 @@ void Game::save(ofstream* dataFile) {
     }
 
     for(int i = 0; i < totalUsers; i++) {
-        up = &(*userList)[i];
+        up = &userList[i];
         sumOpTime    += up->getOpTime();
         sumOpCost    += up->getOpTime();
         sumAccReward += up->getAccReward();
@@ -275,7 +291,7 @@ void Game::save(ofstream* dataFile) {
     missedRewards = 0;
 
     for(int i = 0; i < totalIncentives; i++) {
-        stp = &(*taskList)[i];
+        stp = &taskList[i];
         if(!stp->getStatus()) {
             missedRewards = stp->getReward();
             remainSTs++;
@@ -308,20 +324,20 @@ void Game::save(ofstream* dataFile) {
 
 
 Game::~Game() {
-
-    board->~Enviroment();
-    delete board;
+    if(board) {
+        delete board;
+        board->~Enviroment();
+    }
 
     for(int i = 0; i < totalUsers; i++) {
-        (*userList)[i].~User();
+        userList[i].~User();
     }
-    userList->clear();
-    delete userList;
+    userList.clear();
+    
 
     for(int i = 0; i < totalIncentives; i++) {
-        (*taskList)[i].~SensingTask();
+        taskList[i].~SensingTask();
     }
-    taskList->clear();
-    delete taskList;
+    taskList.clear();
     
 }
