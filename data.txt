@@ -1,6 +1,0 @@
-Number of Trials:	1
-Board Size: 		20x20
-Predicted budget:	100
-Percentage: 		50
-Number of Users:	13
-Number of tasks:	200
