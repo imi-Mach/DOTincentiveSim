@@ -5,6 +5,7 @@
 #include <algorithm>        /* shuffle algorithm for random user selection*/
 #include <random>           /* seed + generator for shuffle */
 #include <chrono>
+#include <thread>
 #include <fstream>
 #include <iomanip>
 #include "Cell.hpp"

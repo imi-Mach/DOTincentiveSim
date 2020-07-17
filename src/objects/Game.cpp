@@ -68,14 +68,14 @@ int Game::step(User* movingUser,Cell* oldCell, const char option) {
 }
 
 void Game::capture(User* user) {
-    int SID;
     SensingTask* stp;
 
-    SID = user->getSID();
-    stp = &taskList[SID];
+    stp = &taskList[user->getSID()-1];
+
 
     user->update(0, stp->getReward());
     stp->update(true, user);
+    finishedIncentives++;
 
 }
 
@@ -83,7 +83,7 @@ void Game::movUser(User* movingUser) {
 
     int cost;                                    /* cost of moving cell to cell */
     SensingTask* stp;                            /* sensingtask gives objective destination */
-    stp = &taskList[movingUser->getSID()];    /* sensingtask is given by user */
+    stp = &taskList[movingUser->getSID()-1];       /* sensingtask is given by user */
 
     /* store x&y coords of user in local variables */
     int x_o = movingUser->getCoord('x');
@@ -137,15 +137,14 @@ void Game::movUser(User* movingUser) {
 }
 
 void Game::set(int round) {
-    trialNum            = round;
     state               = INPROGRESS;
+    trialNum            = round;
     totalTime           = 0;
     totalDrops          = 0;
     finishedIncentives  = 0;
     int x               = -1;
     int y               = -1;
     Cell* cp            = nullptr;
-    
     board->set();
 
     for(int i = 0; i < totalUsers; i++) {   /* possible infinte loop if x and y fail to be random */
@@ -196,6 +195,7 @@ void Game::set(int round) {
     for(int i = 0; i < totalIncentives; i++) {
         cout << "Task[" << i << "] (x,y) = " << taskList[i].getCoord('x') << ", " << taskList[i].getCoord('y') << '\n';
     }
+    cout << endl;
     */
 }
 
@@ -217,15 +217,42 @@ void Game::play() {
 
             if(SID == 0) {                              /* if SID == 0, then user goes through task selection process */
                 up->selectSID(board, &taskList, totalIncentives);
+                if(up->getSID() == -1) {
+                    totalDrops++;
+                }
                 i--;
                 continue;
             }
             else if(SID > 0) {                          /* if SID > 0, then user moves. */
                 movUser(up);
             }
+
         }
         
-        if(totalDrops == totalUsers) {
+        /*
+        for(int i = 0; i < totalUsers; i++) {
+            cout << "User[" << i << "] SID = " << userList[i].getSID() << '\n';
+            cout << "ST  [" << userList[i].getSID() << "] (x,y) = " << taskList[userList[i].getSID()-1].getCoord('x') << ", " << taskList[userList[i].getSID()-1].getCoord('x') << "\n" <<endl;
+        }
+        */
+        
+        
+        for(int i = 0; i < boardSize; i++) {
+            for(int j = 0; j < boardSize; j++) {
+                if (!board->getCell(i,j)->getResVec()->empty()) cout << "1 ";
+                else if (board->getCell(i,j)->getTask()) cout << "0 ";
+                else cout << "  ";
+            }
+            cout << endl;
+        }
+        cout << "\n----------------------\n" << endl;
+        
+        this_thread::sleep_for(std::chrono::milliseconds(500));
+
+        
+        
+        
+        if(totalDrops == totalUsers) {                      /* UPDATE IN SELECT USER FUNCTION */
             if(finishedIncentives == totalIncentives) {
                 state = COMPLETE;
             }
@@ -313,7 +340,7 @@ void Game::save(ofstream* dataFile) {
               << '\n' << line << '\n' ;
     }
 
-    *dataFile << line << '\n' << sep
+    *dataFile << sep
               << setw(intVal_width) << trialNum << sep << setw(gamestat_width) << finGameState << sep
               << setw(intVal_width) << totalTime << sep << setw(intVal_width) << avgCostCell << sep
               << setw(intVal_width) << sumOpCost << sep<< fixed << setprecision(2) << setw(fltVal_width) << sumAccReward << sep
@@ -324,10 +351,14 @@ void Game::save(ofstream* dataFile) {
 
 
 Game::~Game() {
-    if(board) {
-        delete board;
-        board->~Enviroment();
-    }
+
+    delete board;
+    /*
+    cout << "HELLO!#" << endl;
+    board->~Enviroment();
+    delete board;
+
+    
 
     for(int i = 0; i < totalUsers; i++) {
         userList[i].~User();
@@ -339,5 +370,5 @@ Game::~Game() {
         taskList[i].~SensingTask();
     }
     taskList.clear();
-    
+    */
 }

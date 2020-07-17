@@ -1,8 +1,10 @@
 #include "Enviroment.hpp"
 
-Enviroment::Enviroment(int size) { 
-    
+Enviroment::Enviroment(int gameSize) { 
     geoSetting = UNIFORM;
+    avgCost = 0;
+    size = gameSize;
+
     vector<Cell> v;
     
     for(int i = 0; i < size; i++) {
@@ -47,11 +49,14 @@ int Enviroment::getAvgCost() {
 }
 
 void Enviroment::set() {
+    int sumCostOfCells = 0;
     for(int i = 0; i < size; i++) {
         for(int j = 0; j < size; j++) {
             grid[i][j].set(assignCost(i, j));
+            sumCostOfCells += grid[i][j].getCost();
         }
     }
+    avgCost = sumCostOfCells / (size * size);
 }
 
 Cell* Enviroment::getCell(int x, int y) {
@@ -70,6 +75,7 @@ Cell* Enviroment::getCell(int x, int y) {
 }
 
 Enviroment::~Enviroment() {
+    /*
     for(int i = 0; i < size; i++) {
         for(int j = 0; j < size; j++) {
             grid[i][j].~Cell();
@@ -77,5 +83,5 @@ Enviroment::~Enviroment() {
         grid[i].clear();
     }
     grid.clear();
-    
+    */
 }

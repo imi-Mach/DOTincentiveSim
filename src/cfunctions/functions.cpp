@@ -6,7 +6,6 @@ void parseArgs(int argc, char **argv, int *trials, int *userNum, int *boardSize,
     if (argc == 11) {
         if ((strcmp(argv[3], "-b") || strcmp(argv[3], "--board")) && isNumber(argv[4])) {
             *boardSize = atoi(argv[4]);
-            if(*userNum < 0) help();
         }
         else {
             help();
@@ -14,7 +13,7 @@ void parseArgs(int argc, char **argv, int *trials, int *userNum, int *boardSize,
 
         if ((strcmp(argv[1], "-u") || strcmp(argv[1], "--user")) && isNumber(argv[2])) {
             *userNum = atoi(argv[2]);
-            if (*userNum > *boardSize * *boardSize) help();
+            if (*userNum > *boardSize * *boardSize || *userNum < 0) help();
         }
         else {
             help();

@@ -30,7 +30,6 @@ void User::selectSID(Enviroment* board, vector<SensingTask>* sensingTaskList, in
      *  - use max value to find best option based on proximity (simple case)
      *  - if best option is lower than 10%, then the user drops
      */
-
     SensingTask* stp;
     int x_f;
     int y_f;
@@ -61,15 +60,17 @@ void User::selectSID(Enviroment* board, vector<SensingTask>* sensingTaskList, in
             y_abs = abs(y_f - y);
             temp_reward = stp->getReward();
             temp_profit = temp_reward - (float)((x_abs + y_abs) * avgCost);
-
+            //cout << "Sensing Task[" << i << "] temp_profit: " << temp_profit << endl;
             if(temp_profit > max_profit) {
                 max_reward = temp_reward;
+                max_profit = temp_profit;
                 newSID = stp->getSID();
             }
 
         }
 
     }
+    //cout << "\nSensing Task [" << newSID-1 << "] max_profit: " << max_profit << "\n" << endl;
 
     if(newSID == -1) {
         SID = -1;
@@ -83,13 +84,15 @@ void User::selectSID(Enviroment* board, vector<SensingTask>* sensingTaskList, in
         nmp = 100.0 * max_profit / max_reward;
     }
 
-    if (nmp_thres < nmp) {
+    //cout << "nmp: " << nmp << endl;
+
+    if (nmp_thres > nmp) {
         SID = -1;
         return;
     }
 
     SID = newSID;
-    (*sensingTaskList)[newSID].update(false, this);
+    (*sensingTaskList)[newSID-1].update(false, this);
 
 }
 

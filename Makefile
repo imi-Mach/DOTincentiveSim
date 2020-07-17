@@ -52,6 +52,8 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 
 clean:
 	$(RM) -r $(BUILD_DIR)
+	rm data.txt
+	rm sim1
 
 -include $(DEPS)
 

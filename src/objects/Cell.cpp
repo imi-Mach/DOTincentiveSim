@@ -11,6 +11,7 @@ void Cell::set(int geoCost){
     if (!resVec.empty()) {
         resVec.clear();
     }
+    sensingTask = nullptr;
 }
 
 void Cell::setTask(SensingTask* task) {
@@ -66,10 +67,7 @@ vector<User*>* Cell::getResVec() {
 }
 
 Cell::~Cell() {
-    /* DEBUG STAGE: cout<<"\n\nCHECK\n" << endl;
-    if(resVec) {
-        resVec.clear();
-        delete resVec;
-    }
+    /*
+    resVec.clear();
     */
 }

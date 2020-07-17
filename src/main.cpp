@@ -30,11 +30,12 @@ int main(int argc, char **argv) {
     float preBudget;  /* optimize problem with numIncentives */
     float percent;
 
-    dataFile.open("data.txt");
 
     int   round = 1;
 
     parseArgs(argc, argv, &trials, &userNum, &boardSize, &preBudget, &percent);
+    
+    dataFile.open("data.txt");
     
     numIncent = (int)floor(((float)(boardSize * boardSize) * percent / 100));
     
@@ -51,11 +52,10 @@ int main(int argc, char **argv) {
     while(trials >= round) {
         game.set(round);            /* set non-static variables to start */
         game.play();           /* turn based game, ends when users all dropout */
-        cout << "\n\n\n-----------------------GAME.PLAY WORKED!!!" << endl;
         game.save(&dataFile);           /* print results into a file the results */
         round++;
+        cout << round << endl;
     }
-    
     dataFile.close();
 
     return 0;
