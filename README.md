@@ -1,4 +1,4 @@
-# DOTincentiveSim
+# DOTincentiveSim (VERSION: 1.0)
 This is the C++ code for simulating different IM.
 
 ## Instructions:
