@@ -236,7 +236,7 @@ void Game::play() {
         }
         */
         
-        
+        /*
         for(int i = 0; i < boardSize; i++) {
             for(int j = 0; j < boardSize; j++) {
                 if (!board->getCell(i,j)->getResVec()->empty()) cout << "1 ";
@@ -248,7 +248,7 @@ void Game::play() {
         cout << "\n----------------------\n" << endl;
         
         this_thread::sleep_for(std::chrono::milliseconds(500));
-
+        */
         
         
         

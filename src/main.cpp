@@ -54,7 +54,6 @@ int main(int argc, char **argv) {
         game.play();           /* turn based game, ends when users all dropout */
         game.save(&dataFile);           /* print results into a file the results */
         round++;
-        cout << round << endl;
     }
     dataFile.close();
 
