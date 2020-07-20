@@ -1,5 +1,6 @@
 #include "Entity.hpp"
 
+/* Attribute set method */
 void Entity::setCoord(const char component, int posVal) {
     switch(component) {
         case 'x':
@@ -18,6 +19,7 @@ void Entity::setCoord(const char component, int posVal) {
     return;
 }
 
+/* Attribute get method */
 int Entity::getCoord(const char component) {
     switch(component) {
         case 'x':
@@ -34,6 +36,7 @@ int Entity::getCoord(const char component) {
     return -2;
 }
 
+/* Attribute get method */
 int Entity::getSID() {
     return SID;
 }

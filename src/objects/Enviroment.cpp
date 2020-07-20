@@ -1,42 +1,47 @@
 #include "Enviroment.hpp"
 
-Enviroment::Enviroment(boardType geoType, int gameSize) {  /* Potential Error */
-    geoSetting = geoType;
-    avgCost    = 0;
-    size       = gameSize;
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/*            Construction Phase:             */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+/* Constructor */
+Enviroment::Enviroment(boardType geoType, int gameSize) {
+    /* construction depends on Game constructor */
+
+    geoSetting = geoType;  /* type of board settings is determined in main.cpp */
+    avgCost    = 0;
+    size       = gameSize; /* size of board passed from main.cpp*/
+
+    /* vector of cell is initialized and used to copy vector members in new grid  */
     vector<Cell> v;
     
-    for(int i = 0; i < size; i++) {
+    for(int i = 0; i < size; i++) {  /* first vector of cells is created */
         v.push_back(Cell());
         
     }
     
-    for(int i = 0; i < size; i++) {
+    for(int i = 0; i < size; i++) {  /* second vector of vectors is created */
         grid.push_back(v);
     }
-
-    /* DEBUG STAGE: 
-    for(int i = 0; i < size; i++)  {
-        vector<Cell> v;
-        for(int j = 0; j < size; j++) {
-                v.push_back(Cell());
-        }
-        grid.push_back(v);
-    }
-    */
     
 }
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/*                Game Phase:                 */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* Attribute manipulator method */
 int Enviroment::assignCost(int x, int y) {
+    /* cost patterns are determined by the boards settings */
+
     switch(geoSetting) {
         case UNIFORM:       /* only case programmed */
             return 1;
-        case SIMPLE:
+        case SIMPLE:        /* could be simple non-uniform costs */
             return 1;
-        case COMPLEX:
+        case COMPLEX:       /* could be square graph with missing nodes and unique costs */
             return 1;
-        case RANDOM:
+        case RANDOM:        /* could be random costs */
             return 1;
     }
 
@@ -44,11 +49,15 @@ int Enviroment::assignCost(int x, int y) {
     return 1;
 }
 
+/* Attribute get method */
 int Enviroment::getAvgCost() {
     return avgCost;
 }
 
+/* Reset method */
 void Enviroment::set() {
+    /* each trial the avg cost and grid of sells are reset */
+
     int sumCostOfCells = 0;
     for(int i = 0; i < size; i++) {
         for(int j = 0; j < size; j++) {
@@ -59,8 +68,10 @@ void Enviroment::set() {
     avgCost = sumCostOfCells / (size * size);
 }
 
+/* Attribute get method */
 Cell* Enviroment::getCell(int x, int y) {
-    
+    /* grid access with minor exception handling */
+
     Cell* cp = nullptr;
 
     try {
@@ -74,14 +85,7 @@ Cell* Enviroment::getCell(int x, int y) {
     return cp;
 }
 
+/* Deconstructor */
 Enviroment::~Enviroment() {
-    /*
-    for(int i = 0; i < size; i++) {
-        for(int j = 0; j < size; j++) {
-            grid[i][j].~Cell();
-        }
-        grid[i].clear();
-    }
-    grid.clear();
-    */
+    
 }

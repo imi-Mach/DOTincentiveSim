@@ -1,16 +1,20 @@
 #include "Game.hpp"
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/*            Construction Phase:             */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* Constructor */
 Game::Game(Enviroment *enviroment, int numIncent, int numUser, int size, float predictedBudget) {
-    /*
-     * Game constructor:
+    /* Game constructor:
      *   - Responsible for initializing all variables
-     *       - local variables intialized
-     *       - enviroment constructed and pointed to
+     *       - counter variables initialized
+     *       - enviroment referenced
      *       - set of users constructed and pointed to
      *       - set of sensing tasks constructed and pointed to
      */
 
-    srand(time(0));
+    srand(time(0)); /* random function set */
     
     state               = CONSTRUCTION;
     trialNum            = 0;
@@ -34,7 +38,21 @@ Game::Game(Enviroment *enviroment, int numIncent, int numUser, int size, float p
 
 }
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/*                Game Phase:                 */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* Attribute manipulator method */
 int Game::step(User* movingUser,Cell* oldCell, const char option) {
+    /* user direction is defined in the cardinal directions */
+
+    /* General Procedure:
+     *  - Determine direction (option)
+     *  - Remove user from current cell (delUser)
+     *  - Calculate adjacent cell location (cp)
+     *  - Add user to new cell resident list (addUser)
+     */ 
+
     Cell* cp = nullptr;
     switch(option) {
         case 'l':
@@ -67,14 +85,25 @@ int Game::step(User* movingUser,Cell* oldCell, const char option) {
     
 }
 
+/* Attribute manipulator method */
 void Game::capture(User* user) {
+    /* once a user moves onto an incentive the capture method updates stats */
+
     SensingTask* stp = &taskList[user->getSID()-1];
     user->update(0, stp->getReward());
     stp->update(true, user);
     finishedIncentives++;
 }
 
+/* Attribute manipulator method */
 void Game::movUser(User* movingUser) {
+    /* handles different cases of user position relative to ST */
+
+    /* General Procedure:
+     *  - Calculate distance between user and incentive
+     *  - resolve which direction to travel
+     *  - check if incentive was reached
+     */
 
     int cost = 1;
     SensingTask* stp = &taskList[movingUser->getSID()-1];
@@ -129,7 +158,10 @@ void Game::movUser(User* movingUser) {
 
 }
 
+/* Reset method */
 void Game::set(int round) {
+    /* all variables are reset for each trial */
+
     state               = INPROGRESS;
     trialNum            = round;
     totalTime           = 0;
@@ -141,7 +173,8 @@ void Game::set(int round) {
 
     board->set();
 
-    for(int i = 0; i < totalUsers; i++) {   /* possible infinte loop if x and y fail to be random */
+    /* users are randomly placed on grid with no overlap */
+    for(int i = 0; i < totalUsers; i++) { 
         x = rng(boardSize);
         y = rng(boardSize);
         
@@ -155,13 +188,14 @@ void Game::set(int round) {
         cp->addUser(&userList[i]);
     }
     
-    for(int i = 0; i < totalIncentives; i++) { /* possible infinte loop if x and y fail to be random */
+    /* ST are randomly placed on grid with no overlap (overlap with user is allowed) */
+    for(int i = 0; i < totalIncentives; i++) {
         x = rng(boardSize);
         y = rng(boardSize);
 
         cp = board->getCell(x,y);
 
-        if (cp->getTask() != nullptr) {  /* add condition to check if resList is empty to relate both */
+        if (cp->getTask() != nullptr) { 
             i--;
             continue;
         }
@@ -171,15 +205,29 @@ void Game::set(int round) {
     
 }
 
+/* Attribute manipulator method */
 void Game::play() {
+    /* each trial this method facilitates the "game" */
+
+    /*
+     * General Purpose:
+     *  - Time based seed is generated for user random selection
+     *  - Random number generator (rng) is defined for shuffle function
+     *  - Game starts:
+     *      - users are shuffled then sequentially selected
+     *      - SID of current user dictates users next action
+     *      - game ends when dropout condition is met (all users have dropped out)
+     *  - Game termination:
+     *      - IF dropout condition, and no ST, then game was successful
+     *      - IF dropout condition, but there is/are ST(s), then game was a failure
+     */
     
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     auto rng      = default_random_engine(seed);
     int  SID      = 0;
-    User *up      = nullptr; /* user pointer */
+    User *up      = nullptr; /* up = user pointer */
     
     while(state == INPROGRESS) {
-
 
         shuffle(userList.begin(), userList.end(), rng); /* users are randomized */
         
@@ -216,7 +264,10 @@ void Game::play() {
         this_thread::sleep_for(std::chrono::milliseconds(500));
         #endif
 
-        if(totalDrops == totalUsers) {                      /* UPDATE IN SELECT USER FUNCTION */
+        /* dropout condition */
+        if(totalDrops == totalUsers) {
+
+            /* update termination condition */
             if(finishedIncentives == totalIncentives) {
                 state = COMPLETE;
             }
@@ -233,6 +284,7 @@ void Game::play() {
 
 }
 
+/* Save data method */
 void Game::save(ofstream* dataFile) {
 
     /* game info */
@@ -252,7 +304,7 @@ void Game::save(ofstream* dataFile) {
     int remainSTs       = 0;
     float missedRewards = 0.0;
 
-    /* Data file info */
+    /* Data format info */
     const int gamestat_width = 6;
     const int intVal_width = 8;
     const int fltVal_width = 10;
@@ -310,25 +362,7 @@ void Game::save(ofstream* dataFile) {
 
 }
 
-
+/* Destructor */
 Game::~Game() {
 
-    /*
-    cout << "HELLO!#" << endl;
-    board->~Enviroment();
-    delete board;
-
-    
-
-    for(int i = 0; i < totalUsers; i++) {
-        userList[i].~User();
-    }
-    userList.clear();
-    
-
-    for(int i = 0; i < totalIncentives; i++) {
-        taskList[i].~SensingTask();
-    }
-    taskList.clear();
-    */
 }
