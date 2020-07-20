@@ -1,8 +1,7 @@
 #include "Cell.hpp"
 
 Cell::Cell() {
-    /* DEBUG STAGE: resVec = new vector<User*>; */
-    cost = 1;                   /* default is 1 */
+    cost = 1;
     sensingTask = nullptr;
 }
 
@@ -20,9 +19,8 @@ void Cell::setTask(SensingTask* task) {
 
 void Cell::addUser(User* newUser) {
     
-    int size;
-    int i;
-
+    int size = 0;
+    
     /* empty vector case */
     if(resVec.empty()) {
         resVec.push_back(newUser);
@@ -32,7 +30,7 @@ void Cell::addUser(User* newUser) {
     size = resVec.size();
 
     /* scan through vector for NULL pointers */
-    for(i = 0; i < size; i++) {
+    for(int i = 0; i < size; i++) {
         if(resVec[i] == nullptr) {
             resVec[i] = newUser;
             return;

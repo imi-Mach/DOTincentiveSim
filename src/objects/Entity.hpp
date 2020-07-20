@@ -1,17 +1,17 @@
 #ifndef ENTITY
 #define ENTITY
 
-#include "functions.h"
+#include "functions.h"  /* definition of bai function */
 
-class Entity {
+class Entity {          /* Entity is a base class for User and SensingTask */
     public:
-        void setCoord(const char, int);
-        int  getCoord(const char);
-        int  getSID();
+        void setCoord(const char, int); /* func desc: IN: x or y component, value of x or y. OUT: n/a*/
+        int  getCoord(const char);      /* func desc: IN: x or y component.                  OUT: value of x or y */
+        int  getSID();                  /* func desc: IN: n/a.                               OUT: SID of entity */
     protected:
-        int SID;            /* set(): */
-        int x;
-        int y;
+        int SID;                        /* var desc: sensing task I.D. */
+        int x;                          /* var desc: x position. */
+        int y;                          /* var desc: y position. */
 
 };
 

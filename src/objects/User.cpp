@@ -31,25 +31,18 @@ void User::selectSID(Enviroment* board, vector<SensingTask>* sensingTaskList, in
      *  - if best option is lower than 10%, then the user drops
      */
     SensingTask* stp;
-    int x_f;
-    int y_f;
-    int x_abs;
-    int y_abs;
-    int avgCost;        /* for more complex boards, this variable would need changing */
-    int newSID;
-    float temp_reward;
-    float max_reward;
-    float temp_profit;
-    float max_profit;
-    float nmp_thres; /* minimum acceptable net marginal profit threshold for user to accept task */
-    float nmp;
-
-    avgCost = board->getAvgCost();
-    newSID = -1;
-    temp_reward = 0;
-    max_reward = 0;
-    temp_profit = 0;
-    max_profit = 0;
+    int x_f             = 0;
+    int y_f             = 0;
+    int x_abs           = 0;
+    int y_abs           = 0;
+    int avgCost         = board->getAvgCost();        /* for more complex boards, this variable would need changing */
+    int newSID          = -1;
+    float temp_reward   = 0;
+    float max_reward    = 0;
+    float temp_profit   = 0;
+    float max_profit    = 0;
+    float nmp_thres     = 10; /* minimum acceptable net marginal profit threshold for user to accept task */
+    float nmp           = 0;    
 
     for(int i = 0; i < numTasks; i++) {
         if((*sensingTaskList)[i].getUser() == nullptr) {
@@ -105,7 +98,7 @@ void User::update(int cost, int distanceRemaing, int x_new, int y_new) {
 }
 
 void User::update(int newSID, float reward) {
-    SID = newSID;
+    SID        = newSID;
     accReward += reward;
 
 }

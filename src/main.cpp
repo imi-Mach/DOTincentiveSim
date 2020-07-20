@@ -29,6 +29,7 @@ int main(int argc, char **argv) {
     int   boardSize;
     float preBudget;  /* optimize problem with numIncentives */
     float percent;
+    boardType geoType = UNIFORM;
 
 
     int   round = 1;
@@ -39,7 +40,8 @@ int main(int argc, char **argv) {
     
     numIncent = (int)floor(((float)(boardSize * boardSize) * percent / 100));
     
-    Game game(numIncent, userNum, boardSize, preBudget);    /* constructing phase */
+    Enviroment board(geoType, boardSize);
+    Game game(&board, numIncent, userNum, boardSize, preBudget);    /* constructing phase */
     
     dataFile << "Number of Trials:\t" << trials
              << "\nBoard Size: \t\t" << boardSize << "x" << boardSize

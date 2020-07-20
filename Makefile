@@ -24,6 +24,11 @@ CPPFLAGS = $(INC_FLAGS) -MMD -MP -ggdb
 CXXFLAGS = -std=c++14 -stdlib=libc++
 LDFLAGS = -stdlib=libc++
 
+all: $(TARGET_EXEC)
+
+debug: CPPFLAGS += -DDEBUG 
+debug: $(TARGET_EXEC)
+
 # main target (C)
 #$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 #	$(CC) $(OBJS) -o $@ $(LDFLAGS)
@@ -52,8 +57,8 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 
 clean:
 	$(RM) -r $(BUILD_DIR)
-	rm data.txt
 	rm sim1
+	rm data.txt
 
 -include $(DEPS)
 
@@ -61,5 +66,6 @@ MKDIR_P ?= mkdir -p
 
 
 .PHONY: run
+
 run: $(BIN)
-	./build/project-name
+	./sim1

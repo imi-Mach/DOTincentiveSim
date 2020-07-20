@@ -1,9 +1,9 @@
 #include "Enviroment.hpp"
 
-Enviroment::Enviroment(int gameSize) { 
-    geoSetting = UNIFORM;
-    avgCost = 0;
-    size = gameSize;
+Enviroment::Enviroment(boardType geoType, int gameSize) {  /* Potential Error */
+    geoSetting = geoType;
+    avgCost    = 0;
+    size       = gameSize;
 
     vector<Cell> v;
     
@@ -61,7 +61,7 @@ void Enviroment::set() {
 
 Cell* Enviroment::getCell(int x, int y) {
     
-    Cell* cp;
+    Cell* cp = nullptr;
 
     try {
         cp = &grid[x][y];

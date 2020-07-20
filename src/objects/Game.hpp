@@ -1,50 +1,50 @@
 #ifndef GAME
 #define GAME
 
-#include <vector>
+#include <vector>           /* allocations for user and ST lists, and other vector methods */
 #include <algorithm>        /* shuffle algorithm for random user selection*/
 #include <random>           /* seed + generator for shuffle */
-#include <chrono>
-#include <thread>
-#include <fstream>
-#include <iomanip>
-#include "Cell.hpp"
-#include "User.hpp"
-#include "SensingTask.hpp"
-#include "Enviroment.hpp"
-#include "functions.h"
+#include <chrono>           /* debugging purposes when displaying turns */
+#include <thread>           /* debugging purposes when displaying turns */
+#include <fstream>          /* file for storing game results */
+#include <iomanip>          /* printing formats for storing results */
+#include "Cell.hpp"         /* definition of cell */
+#include "User.hpp"         /* definition of user */
+#include "SensingTask.hpp"  /* definition of ST */
+#include "Enviroment.hpp"   /* definition of enviroment */
+#include "functions.h"      /* bail function */
 
 
-enum gameStatus {
+enum gameStatus {           /* different states of game */
     CONSTRUCTION,
     INPROGRESS,
     COMPLETE,
     USERSFAILED
 };
 
-class Game {
+class Game {                /* Game class maintains crucial information about structure of simulation */
     public:
-        Game(int, int, int, float);     /* constructs enviroment -> constructs users and sensing tasks */
-        int  step(User*, Cell*, char);
-        void capture(User*);
-        void movUser(User*);            /* parameter desc: user moving, source, destination */
-        void set(int);                     /* reset board to inital conditions */
-        void play();                    /* play game */
-        void save(ofstream*);
+        Game(Enviroment*, int, int, int, float); /* func desc: IN: current enviroment, number of incentives, number of users, board size, predicted budget. OUT: initialized game. */
+        int  step(User*, Cell*, char);           /* func desc: IN: moving user, current cell, direction.                                                    OUT: cost of moving. */
+        void capture(User*);                     /* func desc: IN: User ptr capturing ST.                                                                   OUT: n/a. */
+        void movUser(User*);                     /* func desc: IN: User ptr for moving user.                                                                OUT: n/a. */
+        void set(int);                           /* func desc: IN: trial number.                                                                            OUT: n/a. */
+        void play();                             /* func desc: IN: set game.                                                                                OUT: finished game. */
+        void save(ofstream*);                    /* func desc: IN: file to save data too.                                                                   OUT: n/a. */
         ~Game();
     private:
-        gameStatus state;
-        int trialNum;
-        int totalTime;
-        int totalIncentives;
-        int totalUsers;
-        int totalDrops;
-        int finishedIncentives;
-        int boardSize;
-        float preBudget;
-        Enviroment* board;
-        vector<User> userList;            /* c): */
-        vector<SensingTask> taskList;     /* c): */
+        gameStatus state;                        /* var desc: current game state: CONSTRUCTION, INPROGRESS, COMPLETE, or USERSFAILED */
+        int trialNum;                            /* var desc: current trial */
+        int totalTime;                           /* var desc: counter starts at 0 and ends when state changes from INPROGRESS */
+        int totalIncentives;                     /* var desc: number of ST for trial */
+        int totalUsers;                          /* var desc: number of users for trial */
+        int totalDrops;                          /* var desc: current number of droped users */
+        int finishedIncentives;                  /* var desc: current number of finished incentives*/
+        int boardSize;                           /* var desc: side length of square board */
+        float preBudget;                         /* var desc: predicted budget */
+        Enviroment* board;                       /* var desc: enviroment created for game */
+        vector<User> userList;                   /* var desc: physical list of users that is referenced by methods */
+        vector<SensingTask> taskList;            /* var desc: physical list of ST that is referenced by methods*/
 
 };
 

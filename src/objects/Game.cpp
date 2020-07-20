@@ -1,6 +1,6 @@
 #include "Game.hpp"
 
-Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
+Game::Game(Enviroment *enviroment, int numIncent, int numUser, int size, float predictedBudget) {
     /*
      * Game constructor:
      *   - Responsible for initializing all variables
@@ -22,7 +22,7 @@ Game::Game(int numIncent, int numUser, int size, float predictedBudget) {
     boardSize           = size;
     preBudget           = predictedBudget;
     
-    board = new Enviroment(boardSize);
+    board = enviroment;
     
     for(int i = 0; i < numUser; i++) {
         userList.push_back(User());
@@ -68,22 +68,16 @@ int Game::step(User* movingUser,Cell* oldCell, const char option) {
 }
 
 void Game::capture(User* user) {
-    SensingTask* stp;
-
-    stp = &taskList[user->getSID()-1];
-
-
+    SensingTask* stp = &taskList[user->getSID()-1];
     user->update(0, stp->getReward());
     stp->update(true, user);
     finishedIncentives++;
-
 }
 
 void Game::movUser(User* movingUser) {
 
-    int cost;                                    /* cost of moving cell to cell */
-    SensingTask* stp;                            /* sensingtask gives objective destination */
-    stp = &taskList[movingUser->getSID()-1];       /* sensingtask is given by user */
+    int cost = 1;
+    SensingTask* stp = &taskList[movingUser->getSID()-1];
 
     /* store x&y coords of user in local variables */
     int x_o = movingUser->getCoord('x');
@@ -111,7 +105,6 @@ void Game::movUser(User* movingUser) {
         }
         else if((x_d == 0) && (y_d == 0)){                          /* case if user starts on incentive */
             capture(movingUser);
-            movUser(movingUser);
             x_f = -1;
             y_f = -1;
         }
@@ -145,6 +138,7 @@ void Game::set(int round) {
     int x               = -1;
     int y               = -1;
     Cell* cp            = nullptr;
+
     board->set();
 
     for(int i = 0; i < totalUsers; i++) {   /* possible infinte loop if x and y fail to be random */
@@ -175,44 +169,23 @@ void Game::set(int round) {
         cp->setTask(&taskList[i]);
     }
     
-    /* DEBUG Printing 
-    cout << '\n';
-    for(int i = 0; i < boardSize; i++) {
-        for(int j = 0; j < boardSize; j++) {
-            cout << board->getCell(i,j)->getCost() << " ";
-        }
-        cout << endl;
-    }
-
-    cout << '\n';
-
-    for(int i = 0; i < totalUsers; i++) {
-        cout << "User[" << i << "] (x,y) = " << userList[i].getCoord('x') << ", " << userList[i].getCoord('y') << '\n';
-    }
-
-    cout << '\n';
-
-    for(int i = 0; i < totalIncentives; i++) {
-        cout << "Task[" << i << "] (x,y) = " << taskList[i].getCoord('x') << ", " << taskList[i].getCoord('y') << '\n';
-    }
-    cout << endl;
-    */
 }
 
 void Game::play() {
     
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-    auto rng = default_random_engine(seed);
-
-    int  SID;
-    User *up = nullptr; /* user pointer */
+    auto rng      = default_random_engine(seed);
+    int  SID      = 0;
+    User *up      = nullptr; /* user pointer */
     
     while(state == INPROGRESS) {
+
+
         shuffle(userList.begin(), userList.end(), rng); /* users are randomized */
         
         for(int i = 0; i < totalUsers; i++) {           /* go through each user and update available users */
             
-            up = &userList[i];
+            up  = &userList[i];
             SID = up->getSID();
 
             if(SID == 0) {                              /* if SID == 0, then user goes through task selection process */
@@ -229,14 +202,7 @@ void Game::play() {
 
         }
         
-        /*
-        for(int i = 0; i < totalUsers; i++) {
-            cout << "User[" << i << "] SID = " << userList[i].getSID() << '\n';
-            cout << "ST  [" << userList[i].getSID() << "] (x,y) = " << taskList[userList[i].getSID()-1].getCoord('x') << ", " << taskList[userList[i].getSID()-1].getCoord('x') << "\n" <<endl;
-        }
-        */
-        
-        /*
+        #ifdef DEBUG
         for(int i = 0; i < boardSize; i++) {
             for(int j = 0; j < boardSize; j++) {
                 if (!board->getCell(i,j)->getResVec()->empty()) cout << "1 ";
@@ -248,10 +214,8 @@ void Game::play() {
         cout << "\n----------------------\n" << endl;
         
         this_thread::sleep_for(std::chrono::milliseconds(500));
-        */
-        
-        
-        
+        #endif
+
         if(totalDrops == totalUsers) {                      /* UPDATE IN SELECT USER FUNCTION */
             if(finishedIncentives == totalIncentives) {
                 state = COMPLETE;
@@ -272,7 +236,7 @@ void Game::play() {
 void Game::save(ofstream* dataFile) {
 
     /* game info */
-    string finGameState;
+    string finGameState = "";
 
     /* enviroment info */
     int avgCostCell     = board->getAvgCost();
@@ -314,13 +278,10 @@ void Game::save(ofstream* dataFile) {
         sumAccReward += up->getAccReward();
     }
 
-    remainSTs = 0;
-    missedRewards = 0;
-
     for(int i = 0; i < totalIncentives; i++) {
         stp = &taskList[i];
         if(!stp->getStatus()) {
-            missedRewards = stp->getReward();
+            missedRewards += stp->getReward();
             remainSTs++;
         }
     }
@@ -352,7 +313,6 @@ void Game::save(ofstream* dataFile) {
 
 Game::~Game() {
 
-    delete board;
     /*
     cout << "HELLO!#" << endl;
     board->~Enviroment();

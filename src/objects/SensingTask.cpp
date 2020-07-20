@@ -17,7 +17,7 @@ void SensingTask::set(int x_pos, int y_pos) {
 }
 
 void SensingTask::update(bool statusChange, User *userParticipant) {
-    status = statusChange;
+    status      = statusChange;
     participant = userParticipant;
 }
 
