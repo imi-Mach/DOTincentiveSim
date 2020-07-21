@@ -87,7 +87,7 @@ void User::selectSID(Enviroment* board, vector<SensingTask>* sensingTaskList, in
  
     /* calculation for net marginal profit */
     if(accReward > 0) {
-        nmp = 100.0 * max_profit / accReward;
+        nmp = 100.0 * (max_profit + accReward) / accReward;
     }
     else if(accReward == 0) {    /* calculation if accReward is undefined */
         nmp = 100.0 * max_profit / max_reward;
