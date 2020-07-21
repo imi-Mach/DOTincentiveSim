@@ -5,7 +5,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /* Constructor */
-Game::Game(Enviroment *enviroment, int numIncent, int numUser, int size, float predictedBudget) {
+Game::Game(Enviroment *enviroment, int numIncent, int numUser, int size, float predictedBudget, bool verboseCheck) {
     /* Game constructor:
      *   - Responsible for initializing all variables
      *       - counter variables initialized
@@ -17,6 +17,7 @@ Game::Game(Enviroment *enviroment, int numIncent, int numUser, int size, float p
     srand(time(0)); /* random function set */
     
     state               = CONSTRUCTION;
+    verbose             = verboseCheck;
     trialNum            = 0;
     totalTime           = 0;
     totalIncentives     = numIncent;
@@ -25,7 +26,11 @@ Game::Game(Enviroment *enviroment, int numIncent, int numUser, int size, float p
     finishedIncentives  = 0;
     boardSize           = size;
     preBudget           = predictedBudget;
-    
+
+    avgWinRate = 0;
+    avgSimTime = 0;
+    avgOpCost  = 0;
+
     board = enviroment;
     
     for(int i = 0; i < numUser; i++) {
@@ -287,79 +292,107 @@ void Game::play() {
 /* Save data method */
 void Game::save(ofstream* dataFile) {
 
-    /* game info */
-    string finGameState = "";
-
-    /* enviroment info */
-    int avgCostCell     = board->getAvgCost();
-
-    /* user info */
-    User *up            = nullptr;
-    int sumOpTime       = 0;
-    int sumOpCost       = 0;
-    float sumAccReward  = 0.0;
-
-    /* sensing task info */
-    SensingTask *stp    = nullptr;
-    int remainSTs       = 0;
-    float missedRewards = 0.0;
-
-    /* Data format info */
-    const int gamestat_width = 6;
-    const int intVal_width = 8;
-    const int fltVal_width = 10;
-    const int num_flds = 9 ;
-    const string sep = " |" ;
-    const int total_width = intVal_width*6 + gamestat_width + fltVal_width*2 + sep.size() * num_flds ;
-    const string line = sep + std::string( total_width-1, '-' ) + '|' ;
+    double factor = ((double)(trialNum-1)/((double)trialNum));
+    double sumOpCost = 0;
+    for(int i = 0; i < totalUsers; i++) {
+        sumOpCost += (double) userList[i].getOpTime();
+    }
 
     if(state == COMPLETE) {
-        finGameState = "COMP";
-    }
-    else if(state == USERSFAILED) {
-        finGameState = "FAIL";
+        avgWinRate = avgWinRate * factor + 1.0/(double)trialNum;
     }
     else {
-        finGameState = "ERR";
+        avgWinRate = avgWinRate * factor;
     }
 
-    for(int i = 0; i < totalUsers; i++) {
-        up = &userList[i];
-        sumOpTime    += up->getOpTime();
-        sumOpCost    += up->getOpTime();
-        sumAccReward += up->getAccReward();
-    }
+    avgSimTime = avgSimTime * factor + totalTime/(double)trialNum;
 
-    for(int i = 0; i < totalIncentives; i++) {
-        stp = &taskList[i];
-        if(!stp->getStatus()) {
-            missedRewards += stp->getReward();
-            remainSTs++;
+    avgOpCost = avgOpCost * factor + sumOpCost/(double)trialNum;
+
+    if(verbose) {
+        /* game info */
+        string finGameState = "";
+
+        /* enviroment info */
+        int avgCostCell     = board->getAvgCost();
+
+        /* user info */
+        User *up            = nullptr;
+        int sumOpTime       = 0;
+        float sumAccReward  = 0.0;
+
+        /* sensing task info */
+        SensingTask *stp    = nullptr;
+        int remainSTs       = 0;
+        float missedRewards = 0.0;
+
+        /* Data format info */
+        const int gamestat_width = 6;
+        const int intVal_width = 8;
+        const int fltVal_width = 10;
+        const int num_flds = 9 ;
+        const string sep = " |" ;
+        const int total_width = intVal_width*5 + gamestat_width + fltVal_width*3 + sep.size() * num_flds ;
+        const string line = sep + std::string( total_width-1, '-' ) + '|' ;
+
+        if(state == COMPLETE) {
+            finGameState = "COMP";
         }
+        else if(state == USERSFAILED) {
+            finGameState = "FAIL";
+        }
+        else {
+            finGameState = "ERR";
+        }
+
+        /*
+        for(int i = 0; i < totalUsers; i++) {
+            up = &userList[i];
+            sumOpTime    += up->getOpTime();
+            sumOpCost    += up->getOpTime();
+            sumAccReward += up->getAccReward();
+        }
+        */
+
+        for(int i = 0; i < totalIncentives; i++) {
+            stp = &taskList[i];
+            if(!stp->getStatus()) {
+                missedRewards += stp->getReward();
+                remainSTs++;
+            }
+        }
+
+        /*
+        * Print order:
+        *  - Game details: trialNum, gamestate, totalTime, avgCostCell, sumOpTime, sumOpCost, sumAccReward, remainSTs, missedRewards
+        * 
+        */
+
+        if(trialNum == 1) {
+            *dataFile << line << '\n' << sep
+                << setw(intVal_width) << "Trial #" << sep << setw(gamestat_width) << "Result" << sep
+                << setw(intVal_width) << "Sim Time" << sep << setw(intVal_width) << "AVG cost" << sep
+                << setw(fltVal_width) << "OP cost" << sep << setw(fltVal_width) << "Rewards($)" << sep
+                << setw(intVal_width) << "ST Left" << sep << setw(fltVal_width) << "Surplus($)" << sep
+                << '\n' << line << '\n' ;
+        }
+
+        *dataFile << sep
+                << setw(intVal_width) << trialNum << sep << setw(gamestat_width) << finGameState << sep
+                << setw(intVal_width) << totalTime << sep << setw(intVal_width) << avgCostCell << sep
+                << setw(fltVal_width) << sumOpCost << sep<< fixed << setprecision(2) << setw(fltVal_width) << sumAccReward << sep
+                << setw(intVal_width) << remainSTs << sep << setw(fltVal_width) << missedRewards << sep
+                << '\n' << line << endl;
     }
 
-    /*
-     * Print order:
-     *  - Game details: trialNum, gamestate, totalTime, avgCostCell, sumOpTime, sumOpCost, sumAccReward, remainSTs, missedRewards
-     * 
-     */
+}
 
-    if(trialNum == 1) {
-        *dataFile << line << '\n' << sep
-              << setw(intVal_width) << "Trial #" << sep << setw(gamestat_width) << "Result" << sep
-              << setw(intVal_width) << "Sim Time" << sep << setw(intVal_width) << "AVG cost" << sep
-              << setw(intVal_width) << "OP cost" << sep << setw(fltVal_width) << "Rewards($)" << sep
-              << setw(intVal_width) << "ST Left" << sep << setw(fltVal_width) << "Surplus($)" << sep
-              << '\n' << line << '\n' ;
+void Game::summary(ofstream* dataFile) {
+    if(verbose) {
+        *dataFile << "\n Summary data:\n";
+        *dataFile << "ORDER: Percentage Covered, Predicted Budget, Win Rates, Simulation Time, Operation Cost\n";
     }
-
-    *dataFile << sep
-              << setw(intVal_width) << trialNum << sep << setw(gamestat_width) << finGameState << sep
-              << setw(intVal_width) << totalTime << sep << setw(intVal_width) << avgCostCell << sep
-              << setw(intVal_width) << sumOpCost << sep<< fixed << setprecision(2) << setw(fltVal_width) << sumAccReward << sep
-              << setw(intVal_width) << remainSTs << sep << setw(fltVal_width) << missedRewards << sep
-              << '\n' << line << '\n' ;
-
+    *dataFile << avgWinRate << ' ' << avgSimTime << ' ' << avgOpCost << endl;
 }
 
 /* Destructor */

@@ -2,8 +2,8 @@
 
 using namespace std;
 
-void parseArgs(int argc, char **argv, int *trials, int *userNum, int *boardSize, float *preBudget, float *percent) {
-    if (argc == 11) {
+void parseArgs(int argc, char **argv, int *trials, int *userNum, int *boardSize, float *preBudget, float *percent, bool *verbose) {
+    if (argc == 11 || argc == 12) {
         if ((strcmp(argv[3], "-b") || strcmp(argv[3], "--board")) && isNumber(argv[4])) {
             *boardSize = atoi(argv[4]);
         }
@@ -43,6 +43,14 @@ void parseArgs(int argc, char **argv, int *trials, int *userNum, int *boardSize,
             help();
         }
 
+        if(argc == 12) {
+            if(strcmp(argv[11], "-v")) {
+                *verbose = true;
+            }
+            else {
+                help();
+            }
+        }
     }
     else {
         help();
@@ -71,6 +79,7 @@ int rng(int i) {
 void help(void) {
     cout << "\n---Parameters for program---\n" << endl;;
     cout << "\"./sim1 -u|--users <# of users> -b|--boardsize <dimension of square board> -p|--percent <percentage of coverage> -pb|--prebudget <budget with decimals> -t|--trials <# of trials>\"\n" << endl;
+    cout << "\nType \"-v\" for verbose option on singular simulation.\n" << endl;
     cout << "Users:\t\tmust be smaller than board and a non-negative integer." << endl;
     cout << "Boardsize:\tmust be a non-negative integer." << endl;
     cout << "Percent:\tmust be a decimal number in range of [0.0,100.0]" << endl;
