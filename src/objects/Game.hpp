@@ -24,16 +24,18 @@ enum gameStatus {           /* different states of game */
 
 class Game {                /* Game class maintains crucial information about structure of simulation */
     public:
-        Game(Enviroment*, int, int, int, float); /* func desc: IN: current enviroment, number of incentives, number of users, board size, predicted budget. OUT: initialized game. */
+        Game(Enviroment*, int, int, int, float, bool); /* func desc: IN: current enviroment, number of incentives, number of users, board size, predicted budget. OUT: initialized game. */
         int  step(User*, Cell*, char);           /* func desc: IN: moving user, current cell, direction.                                                    OUT: cost of moving. */
         void capture(User*);                     /* func desc: IN: User ptr capturing ST.                                                                   OUT: n/a. */
         void movUser(User*);                     /* func desc: IN: User ptr for moving user.                                                                OUT: n/a. */
         void set(int);                           /* func desc: IN: trial number.                                                                            OUT: n/a. */
         void play();                             /* func desc: IN: set game.                                                                                OUT: finished game. */
         void save(ofstream*);                    /* func desc: IN: file to save data too.                                                                   OUT: n/a. */
+        void summary(ofstream*);                 /* func desc: IN: file to save summary data.                                                               OUT: n/a. */
         ~Game();
     private:
         gameStatus state;                        /* var desc: current game state: CONSTRUCTION, INPROGRESS, COMPLETE, or USERSFAILED */
+        bool verbose;                            /* var desc:  */
         int trialNum;                            /* var desc: current trial */
         int totalTime;                           /* var desc: counter starts at 0 and ends when state changes from INPROGRESS */
         int totalIncentives;                     /* var desc: number of ST for trial */
@@ -42,10 +44,13 @@ class Game {                /* Game class maintains crucial information about st
         int finishedIncentives;                  /* var desc: current number of finished incentives*/
         int boardSize;                           /* var desc: side length of square board */
         float preBudget;                         /* var desc: predicted budget */
+        double avgWinRate;                        /* var desc: avg success rate */
+        double avgSimTime;                        /* var desc: avg simulation time */
+        double avgOpCost;                         /* var desc: avg operation cost */
         Enviroment* board;                       /* var desc: enviroment created for game */
         vector<User> userList;                   /* var desc: physical list of users that is referenced by methods */
         vector<SensingTask> taskList;            /* var desc: physical list of ST that is referenced by methods*/
 
 };
 
-#endif
+#endif 
