@@ -29,13 +29,17 @@ all: $(TARGET_EXEC)
 debug: CPPFLAGS += -DDEBUG 
 debug: $(TARGET_EXEC)
 
+test: test.out
+test.out: $(OBJS) ./main2/main.o
+	$(CXX) $(OBJS) ./main2/main.o -o $@ $(LDFLAGS)
+
 # main target (C)
 #$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 #	$(CC) $(OBJS) -o $@ $(LDFLAGS)
 
 # main target (C++)
-$(TARGET_EXEC): $(OBJS)
-	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
+$(TARGET_EXEC): $(OBJS) ./main1/main.o
+	$(CXX) $(OBJS) ./main1/main.o -o $@ $(LDFLAGS)
 
 # assembly
 $(BUILD_DIR)/%.s.o: %.s
@@ -52,6 +56,11 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(MKDIR_P) $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
+./main1/main.o: ./main1/main.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./main1/main.cpp -o ./main1/main.o
+
+./main2/main.o: ./main2/main.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./main2/main.cpp -o ./main2/main.o
 
 .PHONY: clean
 
