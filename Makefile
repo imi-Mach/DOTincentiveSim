@@ -1,7 +1,3 @@
-#CXX=g++\
-CFLAGS=-g -Wall -Wextra -Wwrite-strings -c\
-LFLAGS=-g
-
 # Flags
 CFLAGS = -std=c99 -pedantic -Wall -Wextra -Wwrite-strings
 
