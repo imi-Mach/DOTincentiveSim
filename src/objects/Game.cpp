@@ -336,6 +336,15 @@ void Game::incentiveMechanism(User* user) {
             break;
         }
 
+        case D_UNIFORM_TSP: {
+            /* first create edge matrix */
+
+            vector<vector<int> > vec( boardSize , vector<int> (boardSize, 0));
+
+            return;
+            break;
+        }
+
         case D_STREAK: {
             return;
             break;

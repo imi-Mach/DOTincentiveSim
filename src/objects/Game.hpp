@@ -20,6 +20,7 @@ enum IM_t {
     S_STCENTER,
     S_USERCENTER,
     D_RELATIVE,
+    D_UNIFORM_TSP,
     D_STREAK
 };
 
