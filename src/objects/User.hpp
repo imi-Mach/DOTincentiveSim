@@ -10,13 +10,14 @@ class Enviroment;
 
 class User : public Entity {    /* User class is derived from entity and represents users in the enviroment */
     public:
-        User();                                                  /* func desc: IN: n/a.                                                               OUT: initilized user.  */
+        User(int);                                                  /* func desc: IN: n/a.                                                               OUT: initilized user.  */
         void  set(int, int);                                     /* func desc: IN: x, and y coordinate for user to be set.                            OUT: n/a. */
         void  selectSID(Enviroment*, vector<SensingTask>*, int); /* func desc: IN: reference to enviroment, reference to list of ST, number of tasks. OUT: n/a. */
         void  update(int, int, int, int);                        /* func desc: IN: cost of travel, distance left, new x position, new y position.     OUT: n/a. */
         void  update(int, float);                                /* func desc: IN: changed SID, reward for capturing ST.                              OUT: n/a. */
         int   getOpTime();                                       /* func desc: IN: n/a.                                                               OUT: operation time.  */
         int   getOpCost();                                       /* func desc: IN: n/a.                                                               OUT: operation cost.  */
+        int   getDistance();
         float getAccReward();                                    /* func desc: IN: n/a.                                                               OUT: accumulated reward.  */
         ~User();
     private:

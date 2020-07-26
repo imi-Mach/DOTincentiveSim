@@ -64,6 +64,7 @@ clean:
 	$(RM) -r $(BUILD_DIR)
 	rm -f sim1
 	rm -f test.out
+	rm -f data.txt
 	rm -f ./main1/main.d
 	rm -f ./main1/main.o
 	rm -f ./main2/main.d

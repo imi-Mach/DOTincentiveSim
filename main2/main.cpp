@@ -21,6 +21,7 @@ int main(int argc, char **argv) {
     float  preBudget     = 0;
     size_t dataPoints    = 100; /* 100 */
     boardType geoType    = UNIFORM;
+    IM_t incentiveMechanism = D_RELATIVE;
     int counter          = 0;
 
     dataFile.open("data.txt", ios_base::app);
@@ -36,7 +37,7 @@ int main(int argc, char **argv) {
             preBudget = (y_spacing * (float) y) + y_offset;
             numIncent = (int)floor(((float)(boardSize * boardSize) * percent / 100));
             Enviroment board(geoType, boardSize);
-            Game game(&board, numIncent, userNum, boardSize, preBudget, false);
+            Game game(&board, incentiveMechanism, numIncent, userNum, boardSize, preBudget, false);
 
             while(trials >= round) {
                 game.set(round);            /* set non-static variables to start */

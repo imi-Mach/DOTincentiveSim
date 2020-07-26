@@ -8,12 +8,14 @@
 SensingTask::SensingTask(int indexSID, float incentive) {
     /* All members are initialized */
 
-    SID         = indexSID;
-    x           = -1;
-    y           = -1;
-    status      = false;
-    reward      = incentive;
-    participant = nullptr;
+    SID             = indexSID;
+    UID             = 0;
+    x               = -1;
+    y               = -1;
+    status          = false;
+    finReward       = 0;
+    reward          = 0;
+    baseReward      = incentive;
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -27,14 +29,23 @@ void SensingTask::set(int x_pos, int y_pos) {
     x           = x_pos;
     y           = y_pos;
     status      = false;
-    participant = nullptr;
+    UID         = 0;
 }
 
 /* Attribute set method */
-void SensingTask::update(bool statusChange, User *userParticipant) {
+void SensingTask::update(bool statusChange, int newUID) {
     /* upon capture by a user the members of the ST must be updated */
     status      = statusChange;
-    participant = userParticipant;
+    finReward   = reward;
+    UID         = newUID;
+}
+
+void SensingTask::setReward(float incentive) {
+    reward = incentive;
+}
+
+void SensingTask::setFinReward(float incentive) {
+    finReward = incentive;
 }
 
 /* Attribute get method */
@@ -47,9 +58,12 @@ float SensingTask::getReward() {
     return reward;
 }
 
-/* Attribute get method */
-User* SensingTask::getUser() {
-    return participant;
+float SensingTask::getFinReward() {
+    return finReward;
+}
+
+float SensingTask::getBaseReward() {
+    return baseReward;
 }
 
 /* destructor */

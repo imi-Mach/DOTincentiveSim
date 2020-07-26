@@ -5,7 +5,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /* Constructor */
-Game::Game(Enviroment *enviroment, int numIncent, int numUser, int size, float predictedBudget, bool verboseCheck) {
+Game::Game(Enviroment *enviroment, IM_t imType, int numIncent, int numUser, int size, float predictedBudget, bool verboseCheck) {
     /* Game constructor:
      *   - Responsible for initializing all variables
      *       - counter variables initialized
@@ -16,7 +16,9 @@ Game::Game(Enviroment *enviroment, int numIncent, int numUser, int size, float p
 
     srand(time(0)); /* random function set */
     
+    im                  = imType;
     state               = CONSTRUCTION;
+    staticFlag          = false;
     verbose             = verboseCheck;
     trialNum            = 0;
     totalTime           = 0;
@@ -34,7 +36,7 @@ Game::Game(Enviroment *enviroment, int numIncent, int numUser, int size, float p
     board = enviroment;
     
     for(int i = 0; i < numUser; i++) {
-        userList.push_back(User());
+        userList.push_back(User(i+1));
     }
 
     for(int i = 0; i < numIncent; i++) {
@@ -95,8 +97,8 @@ void Game::capture(User* user) {
     /* once a user moves onto an incentive the capture method updates stats */
 
     SensingTask* stp = &taskList[user->getSID()-1];
-    user->update(0, stp->getReward());
-    stp->update(true, user);
+    user->update(0, stp->getFinReward());
+    stp->update(true, user->getUID());
     finishedIncentives++;
 }
 
@@ -210,6 +212,139 @@ void Game::set(int round) {
     
 }
 
+void Game::incentiveMechanism(User* user) {
+
+    switch(im) {
+        case S_UNIFORM: {
+            if(staticFlag) return;
+            staticFlag = true;
+
+            for(int i = 0; i < totalIncentives; i++) {
+                taskList[i].setReward(taskList[i].getBaseReward());
+            }
+            return;
+            break;
+        }
+        case S_UNIFORM_TSP: {/* use modulo to create subsets */ 
+
+        }
+        case S_STCENTER: {
+            if(staticFlag) return;
+            staticFlag = true;
+            
+            SensingTask *stp = nullptr;
+            int avg_x = 0;
+            int avg_y = 0;
+            int disp_x = 0;
+            int disp_y = 0;
+            int distance = 0;
+            double ratio = 0;
+
+            for(int i = 0; i < totalIncentives; i++) {
+                avg_x += taskList[i].getCoord('x');
+                avg_y += taskList[i].getCoord('y');
+            }
+
+            avg_x = (int)floor((double)avg_x / (double)totalIncentives);
+            avg_y = (int)floor((double)avg_y / (double)totalIncentives);
+
+            for (int i = 0; i < totalIncentives; i++) {
+                stp = &taskList[i];
+                disp_x = abs(stp->getCoord('x') - avg_x);
+                disp_y = abs(stp->getCoord('y') - avg_y);
+                distance = disp_x + disp_y;
+                ratio = (((double)distance) / ((double)(2 * boardSize)))/2; /* 0.0-50.0 range */
+                stp->setReward((float)(1-ratio) * stp->getBaseReward());
+            }
+
+            return;
+            break;
+        }
+        case S_USERCENTER: {        /* rewards need to be associated to user */
+            if(staticFlag) return;
+            staticFlag = true;
+
+            SensingTask *stp = nullptr;
+            int avg_x = 0;
+            int avg_y = 0;
+            int disp_x = 0;
+            int disp_y = 0;
+            int distance = 0;
+            double ratio = 0;
+
+            for(int i = 0; i < totalUsers; i++) {
+                avg_x += userList[i].getCoord('x');
+                avg_y += userList[i].getCoord('y');
+            }
+
+            avg_x = (int)floor((double)avg_x / (double)totalUsers);
+            avg_y = (int)floor((double)avg_y / (double)totalUsers);
+            
+            for (int i = 0; i < totalIncentives; i++) {
+                stp = &taskList[i];
+                disp_x = abs(stp->getCoord('x') - avg_x);
+                disp_y = abs(stp->getCoord('y') - avg_y);
+                distance = disp_x + disp_y;
+                ratio = (((double)distance) / ((double)(2 * boardSize)))/2; /* 0.0-50.0 range */
+                stp->setReward((float)(1-ratio) * stp->getBaseReward());
+            }
+            return;
+            break;
+        }
+
+        case D_RELATIVE: {
+            SensingTask* stp = nullptr;
+            User* up = nullptr;
+            vector<int> distance(totalUsers, 0);
+            int counter = 0;
+            int place   = 1;
+            int userDistance;
+
+            for(int i = 0; i < totalIncentives; i++) {
+                if((stp = &taskList[i])->getUID() > 0) {
+                    continue;
+                }
+                for(int j = 0; j < totalUsers; j++) {
+                    up = &userList[j];
+                    if(up->getSID() > 0) {
+                        distance[j]  = userList[j].getDistance();
+                        distance[j] += (abs(stp->getCoord('x') - taskList[up->getSID() - 1].getCoord('x')) + abs(stp->getCoord('y') - taskList[up->getSID() - 1].getCoord('y')));
+                    }
+                    else if(up->getSID() == 0) {
+                        distance[j] = (abs(stp->getCoord('x') - up->getCoord('x')) + abs(stp->getCoord('y') - up->getCoord('y')));
+                    }
+                    else if(up->getSID() == -1) {
+                        distance[j] = 0;
+                    }
+                }
+                userDistance = distance[user->getUID()-1];
+                while(counter < totalUsers) {
+                    if(userDistance > distance[counter]) {
+                        place++;
+                    }
+                    counter++;
+                }
+
+                if(place == 1) stp->setReward(stp->getBaseReward());
+                else stp->setReward(stp->getBaseReward() * (1.0 - 0.5 * ((place)/totalUsers)));
+                
+                place = 1;
+                counter = 0;
+                for(int j = 0; j < totalUsers; j++) distance[j] = 0;
+            }
+            return;
+            break;
+        }
+
+        case D_STREAK: {
+            return;
+            break;
+        }
+
+    }
+
+}
+
 /* Attribute manipulator method */
 void Game::play() {
     /* each trial this method facilitates the "game" */
@@ -242,6 +377,7 @@ void Game::play() {
             SID = up->getSID();
 
             if(SID == 0) {                              /* if SID == 0, then user goes through task selection process */
+                incentiveMechanism(up);
                 up->selectSID(board, &taskList, totalIncentives);
                 if(up->getSID() == -1) {
                     totalDrops++;
@@ -256,17 +392,37 @@ void Game::play() {
         }
         
         #ifdef DEBUG
+
+        int k = 0;
+
         for(int i = 0; i < boardSize; i++) {
             for(int j = 0; j < boardSize; j++) {
-                if (!board->getCell(i,j)->getResVec()->empty()) cout << "1 ";
-                else if (board->getCell(i,j)->getTask()) cout << "0 ";
-                else cout << "  ";
+                k = 0;
+                for(; k < totalUsers; k++) {
+                    if((userList[k].getCoord('x') == i) && (userList[k].getCoord('y') == j)) {
+                        //cout << "[" << userList[k].getCoord('x') << "," << userList[k].getCoord('y') << "]";
+                        cout << "i ";
+                        break;
+                    }
+
+                }
+                if((k == totalUsers) && (board->getCell(i,j)->getTask() != nullptr)) {
+                    if (!board->getCell(i,j)->getTask()->getStatus()) {
+                        cout << "S ";
+                    }
+                    else cout << "  ";
+                }
+                else if(k == totalUsers) {
+                    cout << "  ";
+                }
             }
             cout << endl;
         }
-        cout << "\n----------------------\n" << endl;
         
+        cout << "-------------------" << endl;
+
         this_thread::sleep_for(std::chrono::milliseconds(500));
+
         #endif
 
         /* dropout condition */
@@ -292,10 +448,15 @@ void Game::play() {
 /* Save data method */
 void Game::save(ofstream* dataFile) {
 
-    double factor = ((double)(trialNum-1)/((double)trialNum));
+    User *up            = nullptr;
+    double sumAccReward  = 0.0;
     double sumOpCost = 0;
+    double factor = ((double)(trialNum-1)/((double)trialNum));
+    
     for(int i = 0; i < totalUsers; i++) {
+        up = &userList[i];
         sumOpCost += (double) userList[i].getOpTime();
+        sumAccReward += up->getAccReward();
     }
 
     if(state == COMPLETE) {
@@ -316,11 +477,6 @@ void Game::save(ofstream* dataFile) {
         /* enviroment info */
         int avgCostCell     = board->getAvgCost();
 
-        /* user info */
-        User *up            = nullptr;
-        int sumOpTime       = 0;
-        float sumAccReward  = 0.0;
-
         /* sensing task info */
         SensingTask *stp    = nullptr;
         int remainSTs       = 0;
@@ -332,7 +488,7 @@ void Game::save(ofstream* dataFile) {
         const int fltVal_width = 10;
         const int num_flds = 9 ;
         const string sep = " |" ;
-        const int total_width = intVal_width*5 + gamestat_width + fltVal_width*3 + sep.size() * num_flds ;
+        const int total_width = intVal_width*5 + gamestat_width + fltVal_width*4 + sep.size() * num_flds ;
         const string line = sep + std::string( total_width-1, '-' ) + '|' ;
 
         if(state == COMPLETE) {
@@ -344,15 +500,6 @@ void Game::save(ofstream* dataFile) {
         else {
             finGameState = "ERR";
         }
-
-        /*
-        for(int i = 0; i < totalUsers; i++) {
-            up = &userList[i];
-            sumOpTime    += up->getOpTime();
-            sumOpCost    += up->getOpTime();
-            sumAccReward += up->getAccReward();
-        }
-        */
 
         for(int i = 0; i < totalIncentives; i++) {
             stp = &taskList[i];
@@ -372,7 +519,7 @@ void Game::save(ofstream* dataFile) {
             *dataFile << line << '\n' << sep
                 << setw(intVal_width) << "Trial #" << sep << setw(gamestat_width) << "Result" << sep
                 << setw(intVal_width) << "Sim Time" << sep << setw(intVal_width) << "AVG cost" << sep
-                << setw(fltVal_width) << "OP cost" << sep << setw(fltVal_width) << "Rewards($)" << sep
+                << setw(fltVal_width) << "OP cost" << sep << setw(fltVal_width) << "Rewards($)" << sep  << setw(fltVal_width) << "Surplus($)" << sep
                 << setw(intVal_width) << "ST Left" << sep << setw(fltVal_width) << "Surplus($)" << sep
                 << '\n' << line << '\n' ;
         }
@@ -380,8 +527,9 @@ void Game::save(ofstream* dataFile) {
         *dataFile << sep
                 << setw(intVal_width) << trialNum << sep << setw(gamestat_width) << finGameState << sep
                 << setw(intVal_width) << totalTime << sep << setw(intVal_width) << avgCostCell << sep
-                << setw(fltVal_width) << sumOpCost << sep<< fixed << setprecision(2) << setw(fltVal_width) << sumAccReward << sep
-                << setw(intVal_width) << remainSTs << sep << setw(fltVal_width) << missedRewards << sep
+                << setw(fltVal_width) << sumOpCost << sep << fixed << setprecision(2) << setw(fltVal_width) << sumAccReward << sep
+                << setw(fltVal_width) << (preBudget -sumAccReward) << sep
+                << setw(intVal_width) << remainSTs << sep << (preBudget - sumAccReward) << sep
                 << '\n' << line << endl;
     }
 
@@ -390,7 +538,7 @@ void Game::save(ofstream* dataFile) {
 void Game::summary(ofstream* dataFile) {
     if(verbose) {
         *dataFile << "\n Summary data:\n";
-        *dataFile << "ORDER: Percentage Covered, Predicted Budget, Win Rates, Simulation Time, Operation Cost\n";
+        *dataFile << "ORDER: Win Rates, Simulation Time, Operation Cost\n";
     }
     *dataFile << avgWinRate << ' ' << avgSimTime << ' ' << avgOpCost << endl;
 }

@@ -4,14 +4,14 @@ using namespace std;
 
 void parseArgs(int argc, char **argv, int *trials, int *userNum, int *boardSize, float *preBudget, float *percent, bool *verbose) {
     if (argc == 11 || argc == 12) {
-        if ((strcmp(argv[3], "-b") || strcmp(argv[3], "--board")) && isNumber(argv[4])) {
+        if ((!strcmp(argv[3], "-b") || !strcmp(argv[3], "--board")) && isNumber(argv[4])) {
             *boardSize = atoi(argv[4]);
         }
         else {
             help();
         }
 
-        if ((strcmp(argv[1], "-u") || strcmp(argv[1], "--user")) && isNumber(argv[2])) {
+        if ((!strcmp(argv[1], "-u") || !strcmp(argv[1], "--user")) && isNumber(argv[2])) {
             *userNum = atoi(argv[2]);
             if (*userNum > *boardSize * *boardSize || *userNum < 0) help();
         }
@@ -19,7 +19,7 @@ void parseArgs(int argc, char **argv, int *trials, int *userNum, int *boardSize,
             help();
         }
 
-        if ((strcmp(argv[5], "-p") || strcmp(argv[5], "--percent")) && isFloat(argv[6])) {
+        if ((!strcmp(argv[5], "-p") || !strcmp(argv[5], "--percent")) && isFloat(argv[6])) {
             *percent = stof(argv[6]);
             if (*percent > 100 || *percent < 0) help();
         }
@@ -27,7 +27,7 @@ void parseArgs(int argc, char **argv, int *trials, int *userNum, int *boardSize,
             help();
         }
 
-        if ((strcmp(argv[7], "-pb") || strcmp(argv[7], "--prebudget")) && isFloat(argv[8])) {
+        if ((!strcmp(argv[7], "-pb") || !strcmp(argv[7], "--prebudget")) && isFloat(argv[8])) {
             *preBudget = stof(argv[8]);
             if (*percent < 0) help();
         }
@@ -35,7 +35,7 @@ void parseArgs(int argc, char **argv, int *trials, int *userNum, int *boardSize,
             help();
         }
 
-        if ((strcmp(argv[9], "-t") || strcmp(argv[9], "--trials")) && isNumber(argv[10])) {
+        if ((!strcmp(argv[9], "-t") || !strcmp(argv[9], "--trials")) && isNumber(argv[10])) {
             *trials = atoi(argv[10]);
             if (*trials < 0) help();
         }
@@ -44,7 +44,7 @@ void parseArgs(int argc, char **argv, int *trials, int *userNum, int *boardSize,
         }
 
         if(argc == 12) {
-            if(strcmp(argv[11], "-v")) {
+            if(!strcmp(argv[11], "-v")) {
                 *verbose = true;
             }
             else {

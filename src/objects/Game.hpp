@@ -14,6 +14,14 @@
 #include "Enviroment.hpp"   /* definition of enviroment */
 #include "functions.h"      /* bail function */
 
+enum IM_t {
+    S_UNIFORM,
+    S_UNIFORM_TSP,
+    S_STCENTER,
+    S_USERCENTER,
+    D_RELATIVE,
+    D_STREAK
+};
 
 enum gameStatus {           /* different states of game */
     CONSTRUCTION,
@@ -24,17 +32,20 @@ enum gameStatus {           /* different states of game */
 
 class Game {                /* Game class maintains crucial information about structure of simulation */
     public:
-        Game(Enviroment*, int, int, int, float, bool); /* func desc: IN: current enviroment, number of incentives, number of users, board size, predicted budget. OUT: initialized game. */
+        Game(Enviroment*, IM_t, int, int, int, float, bool); /* func desc: IN: current enviroment, number of incentives, number of users, board size, predicted budget. OUT: initialized game. */
         int  step(User*, Cell*, char);           /* func desc: IN: moving user, current cell, direction.                                                    OUT: cost of moving. */
         void capture(User*);                     /* func desc: IN: User ptr capturing ST.                                                                   OUT: n/a. */
         void movUser(User*);                     /* func desc: IN: User ptr for moving user.                                                                OUT: n/a. */
         void set(int);                           /* func desc: IN: trial number.                                                                            OUT: n/a. */
+        void incentiveMechanism(User*);
         void play();                             /* func desc: IN: set game.                                                                                OUT: finished game. */
         void save(ofstream*);                    /* func desc: IN: file to save data too.                                                                   OUT: n/a. */
         void summary(ofstream*);                 /* func desc: IN: file to save summary data.                                                               OUT: n/a. */
         ~Game();
     private:
+        IM_t im;
         gameStatus state;                        /* var desc: current game state: CONSTRUCTION, INPROGRESS, COMPLETE, or USERSFAILED */
+        bool staticFlag;
         bool verbose;                            /* var desc:  */
         int trialNum;                            /* var desc: current trial */
         int totalTime;                           /* var desc: counter starts at 0 and ends when state changes from INPROGRESS */

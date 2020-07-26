@@ -40,3 +40,7 @@ int Entity::getCoord(const char component) {
 int Entity::getSID() {
     return SID;
 }
+
+int Entity::getUID() {
+    return UID;
+}

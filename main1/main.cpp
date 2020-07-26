@@ -37,12 +37,12 @@ int main(int argc, char **argv) {
 
     parseArgs(argc, argv, &trials, &userNum, &boardSize, &preBudget, &percent, &verbose);
     
-    dataFile.open("data.txt");
+    dataFile.open("data.txt", ios::app);
     
     numIncent = (int)floor(((float)(boardSize * boardSize) * percent / 100));
     
     Enviroment board(geoType, boardSize);
-    Game game(&board, numIncent, userNum, boardSize, preBudget, verbose);    /* constructing phase */
+    Game game(&board, S_UNIFORM, numIncent, userNum, boardSize, preBudget, verbose);    /* constructing phase */
     
     if(verbose){
         dataFile << "Number of Trials:\t" << trials
@@ -55,11 +55,14 @@ int main(int argc, char **argv) {
     }
     
     while(trials >= round) {
-        game.set(round);            /* set non-static variables to start */
-        game.play();           /* turn based game, ends when users all dropout */
+        game.set(round);                /* set non-static variables to start */
+        game.play();                    /* turn based game, ends when users all dropout */
         game.save(&dataFile);           /* print results into a file the results */
         round++;
     }
+
+    game.summary(&dataFile);
+
     dataFile.close();
 
     return 0;

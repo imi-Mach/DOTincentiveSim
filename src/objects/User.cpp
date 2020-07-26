@@ -5,12 +5,13 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /* Constructor */
-User::User() {
+User::User(int newUID) {
     /* initialized all members */
 
     SID       = 0;
     x         = -1;
     y         = -1;
+    UID       = newUID;
     opTime    = 0;
     opCost    = 0;
     distance  = 0;
@@ -61,7 +62,7 @@ void User::selectSID(Enviroment* board, vector<SensingTask>* sensingTaskList, in
     float nmp           = 0;    
 
     for(int i = 0; i < numTasks; i++) {                     /* maximum reward finding algorithm */
-        if((*sensingTaskList)[i].getUser() == nullptr) {
+        if((*sensingTaskList)[i].getUID() == 0) {
             stp = &(*sensingTaskList)[i];
             x_f = stp->getCoord('x');
             y_f = stp->getCoord('y');
@@ -101,7 +102,8 @@ void User::selectSID(Enviroment* board, vector<SensingTask>* sensingTaskList, in
 
     /* if all test pass, then user is assigned ST with SID equal to newSID */
     SID = newSID;
-    (*sensingTaskList)[newSID-1].update(false, this);
+    (*sensingTaskList)[newSID-1].setFinReward((*sensingTaskList)[newSID-1].getReward());
+    (*sensingTaskList)[newSID-1].update(false, UID);
 
 }
 
@@ -122,6 +124,7 @@ void User::update(int newSID, float reward) {
 
     SID        = newSID;
     accReward += reward;
+    distance   = 0;
 
 }
 
@@ -131,8 +134,12 @@ int User::getOpTime() {
 }
 
 /* Attribute get method */
-int User:: getOpCost() {
+int User::getOpCost() {
     return opCost;
+}
+
+int User::getDistance() {
+    return distance;
 }
 
 /* Attribute get method */
