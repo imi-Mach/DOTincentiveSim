@@ -1,6 +1,7 @@
 #ifndef GAME
 #define GAME
 
+#include <unordered_map>
 #include <vector>           /* allocations for user and ST lists, and other vector methods */
 #include <algorithm>        /* shuffle algorithm for random user selection*/
 #include <random>           /* seed + generator for shuffle */
@@ -16,11 +17,15 @@
 
 enum IM_t {
     S_UNIFORM,
-    S_UNIFORM_TSP,
     S_STCENTER,
     S_USERCENTER,
+    D_STCENTER,
+    D_USERCENTER,
+    D_PREDICT,
     D_RELATIVE,
-    D_UNIFORM_TSP,
+    D_TSP,
+    D_GROUP_TSP,
+    D_GROUP_PREDICT,
     D_STREAK
 };
 
@@ -59,7 +64,9 @@ class Game {                /* Game class maintains crucial information about st
         double avgWinRate;                        /* var desc: avg success rate */
         double avgSimTime;                        /* var desc: avg simulation time */
         double avgOpCost;                         /* var desc: avg operation cost */
+        double avgSurplus;
         Enviroment* board;                       /* var desc: enviroment created for game */
+        vector<vector<int>> STdistanceMatrix;
         vector<User> userList;                   /* var desc: physical list of users that is referenced by methods */
         vector<SensingTask> taskList;            /* var desc: physical list of ST that is referenced by methods*/
 

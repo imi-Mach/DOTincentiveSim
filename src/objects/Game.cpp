@@ -210,6 +210,29 @@ void Game::set(int round) {
         cp->setTask(&taskList[i]);
     }
     
+    if(im == D_GROUP_PREDICT) {
+
+        vector<vector<int> > distanceMatrix( totalIncentives , vector<int> (totalIncentives, 0));
+        STdistanceMatrix = distanceMatrix;
+
+        SensingTask* stp = nullptr;
+        int x_coord = 0;
+        int y_coord = 0;
+        int distance = 0;
+
+        for(int i = 0; i < totalIncentives; i++) {
+            stp     = &taskList[i];
+            x_coord = stp->getCoord('x');
+            y_coord = stp->getCoord('y'); 
+            for (int j = i; j < totalIncentives; j++) {
+                distance = abs((abs(x_coord - taskList[j].getCoord('x')) + abs(y_coord - taskList[j].getCoord('y'))));
+                STdistanceMatrix[i][j] = distance;
+                STdistanceMatrix[j][i] = distance;
+            }
+        }
+
+    }
+
 }
 
 void Game::incentiveMechanism(User* user) {
@@ -224,9 +247,6 @@ void Game::incentiveMechanism(User* user) {
             }
             return;
             break;
-        }
-        case S_UNIFORM_TSP: {/* use modulo to create subsets */ 
-
         }
         case S_STCENTER: {
             if(staticFlag) return;
@@ -291,6 +311,147 @@ void Game::incentiveMechanism(User* user) {
             return;
             break;
         }
+        case D_STCENTER: {
+            
+            SensingTask *stp = nullptr;
+            int avg_x = 0;
+            int avg_y = 0;
+            int disp_x = 0;
+            int disp_y = 0;
+            int distance = 0;
+            double ratio = 0;
+
+            for(int i = 0; i < totalIncentives; i++) {
+                avg_x += taskList[i].getCoord('x');
+                avg_y += taskList[i].getCoord('y');
+            }
+
+            avg_x = (int)floor((double)avg_x / (double)totalIncentives);
+            avg_y = (int)floor((double)avg_y / (double)totalIncentives);
+
+            for (int i = 0; i < totalIncentives; i++) {
+                stp = &taskList[i];
+                disp_x = abs(stp->getCoord('x') - avg_x);
+                disp_y = abs(stp->getCoord('y') - avg_y);
+                distance = disp_x + disp_y;
+                ratio = (((double)distance) / ((double)(2 * boardSize)))/2; /* 0.0-50.0 range */
+                stp->setReward((float)(1-ratio) * stp->getBaseReward());
+            }
+
+            return;
+            break;
+        }
+        case D_USERCENTER: {
+
+            SensingTask *stp = nullptr;
+            int avg_x = 0;
+            int avg_y = 0;
+            int disp_x = 0;
+            int disp_y = 0;
+            int distance = 0;
+            double ratio = 0;
+
+            for(int i = 0; i < totalUsers; i++) {
+                avg_x += userList[i].getCoord('x');
+                avg_y += userList[i].getCoord('y');
+            }
+
+            avg_x = (int)floor((double)avg_x / (double)totalUsers);
+            avg_y = (int)floor((double)avg_y / (double)totalUsers);
+            
+            for (int i = 0; i < totalIncentives; i++) {
+                stp = &taskList[i];
+                disp_x = abs(stp->getCoord('x') - avg_x);
+                disp_y = abs(stp->getCoord('y') - avg_y);
+                distance = disp_x + disp_y;
+                ratio = (((double)distance) / ((double)(2 * boardSize)))/2; /* 0.0-50.0 range */
+                stp->setReward((float)(1-ratio) * stp->getBaseReward());
+            }
+            return;
+            break;
+        }
+        case D_PREDICT: {
+
+            unordered_map <int,int> umap;
+            umap[0] = 0;
+
+            int SIDindex   = 0;
+            int index_dm   = 1;
+            int totalNodes = 0;
+            int x_coord    = 0;
+            int y_coord    = 0;
+            int distance   = 0;
+            int tempDist   = 0;
+            int minDist    = boardSize * 2 + 1;
+            int targetSID  = 0;
+
+            SensingTask *stp = nullptr;
+            for(int i = 0; i < totalIncentives; i++) {
+                if(taskList[i].getUID() == 0) {
+                    umap[index_dm] = i+1;
+                    index_dm++;
+                } 
+            }
+
+            totalNodes = umap.size();
+            
+            if(totalNodes > 2) {
+                vector<vector<int> > distanceMatrix( totalNodes , vector<int> (totalNodes, 0));
+
+                x_coord = user->getCoord('x');
+                y_coord = user->getCoord('y');
+                for (int i = 1; i < totalNodes; i++) {
+                    distance = abs((abs(x_coord - taskList[umap[i]-1].getCoord('x')) + abs(y_coord - taskList[umap[i]-1].getCoord('y'))));
+                    distanceMatrix[0][i] = distance;
+                    distanceMatrix[i][0] = distance;
+                }
+                
+
+                for(int i = 1; i < totalNodes; i++) {
+                    stp     = &taskList[umap[i]-1];
+                    x_coord = stp->getCoord('x');
+                    y_coord = stp->getCoord('y'); 
+                    for (int j = i+1; j < totalNodes; j++) {
+                        distance = abs((abs(x_coord - taskList[umap[j]-1].getCoord('x')) + abs(y_coord - taskList[umap[j]-1].getCoord('y'))));
+                        distanceMatrix[i][j] = distance;
+                        distanceMatrix[j][i] = distance;
+                    }
+                }
+
+                for(int i = 1; i < totalNodes; i++) {
+                    for(int j = 1; j < totalNodes; j++) {
+                        if(i == j) continue;
+                        for(int k = 1; k < totalNodes; k++) {
+                            if((j == k) || (i == k)) continue;
+                            tempDist = distanceMatrix[0][i] + distanceMatrix[i][j] + distanceMatrix[j][k];
+                            if(tempDist < minDist) {
+                                minDist = tempDist;
+                                /* print best path */
+                                targetSID = umap[i];
+                            }
+                            
+                        }
+
+                    }
+                    
+                }
+
+                for(int i = 1; i < totalNodes; i++) {
+                    taskList[umap[i]-1].setReward(0.50 * taskList[umap[i]-1].getBaseReward());
+                }
+                taskList[targetSID-1].setReward(taskList[targetSID-1].getBaseReward());
+                
+            }
+            else {
+                for (int i = 1; i < totalNodes; i++) {
+                    taskList[umap[i]-1].setReward(taskList[umap[i]-1].getBaseReward());
+                }
+                
+            }
+            
+            return;
+            break;
+        }
 
         case D_RELATIVE: {
             SensingTask* stp = nullptr;
@@ -336,10 +497,170 @@ void Game::incentiveMechanism(User* user) {
             break;
         }
 
-        case D_UNIFORM_TSP: {
+        case D_TSP: {
             /* first create edge matrix */
 
-            vector<vector<int> > vec( boardSize , vector<int> (boardSize, 0));
+            unordered_map <int,int> umap;
+            umap[0] = 0;
+
+            int SIDindex   = 0;
+            int index_dm   = 1;
+            int totalNodes = 0;
+            int x_coord    = 0;
+            int y_coord    = 0;
+            int distance   = 0;
+
+            SensingTask *stp = nullptr;
+            for(int i = 0; i < totalIncentives; i++) {
+                if(taskList[i].getUID() == 0) {
+                    umap[index_dm] = i+1;
+                    index_dm++;
+                } 
+            }
+
+            totalNodes = umap.size();
+            
+            vector<vector<int> > distanceMatrix( totalNodes , vector<int> (totalNodes, 0));
+
+            x_coord = user->getCoord('x');
+            y_coord = user->getCoord('y');
+            for (int i = 1; i < totalNodes; i++) {
+                distance = abs((abs(x_coord - taskList[umap[i]-1].getCoord('x')) + abs(y_coord - taskList[umap[i]-1].getCoord('y'))));
+                distanceMatrix[0][i] = distance;
+                distanceMatrix[i][0] = distance;
+            }
+            
+
+            for(int i = 1; i < totalNodes; i++) {
+                stp     = &taskList[umap[i]-1];
+                x_coord = stp->getCoord('x');
+                y_coord = stp->getCoord('y'); 
+                for (int j = i+1; j < totalNodes; j++) {
+                    distance = abs((abs(x_coord - taskList[umap[j]-1].getCoord('x')) + abs(y_coord - taskList[umap[j]-1].getCoord('y'))));
+                    distanceMatrix[i][j] = distance;
+                    distanceMatrix[j][i] = distance;
+                }
+            }
+            
+
+            return;
+            break;
+        }
+        case D_GROUP_TSP: {/* use modulo to create subsets */ 
+
+            int group = user->getUID()%totalUsers;
+            int group_st = totalIncentives/totalUsers;
+
+            unordered_map <int,int> umap;
+            umap[0] = 0;
+
+            int SIDindex   = 0;
+            int index_dm   = 1;
+            int totalNodes = 0;
+            int x_coord    = 0;
+            int y_coord    = 0;
+            int distance   = 0;
+
+            SensingTask *stp = nullptr;
+
+            for(int i = 0; i < totalIncentives; i++) {
+                if((group == (i%totalUsers)) && (taskList[i].getUID() == 0)) {
+                    umap[index_dm] = i+1;
+                    index_dm++;
+                }
+            }
+
+            totalNodes = umap.size();
+            
+            vector<vector<int> > distanceMatrix( totalNodes , vector<int> (totalNodes, 0));
+
+            x_coord = user->getCoord('x');
+            y_coord = user->getCoord('y');
+            for (int i = 1; i < totalNodes; i++) {
+                distance = abs((abs(x_coord - taskList[umap[i]-1].getCoord('x')) + abs(y_coord - taskList[umap[i]-1].getCoord('y'))));
+                distanceMatrix[0][i] = distance;
+                distanceMatrix[i][0] = distance;
+            }
+            
+
+            for(int i = 1; i < totalNodes; i++) {
+                stp     = &taskList[umap[i]-1];
+                x_coord = stp->getCoord('x');
+                y_coord = stp->getCoord('y'); 
+                for (int j = i+1; j < totalNodes; j++) {
+                    distance = abs((abs(x_coord - taskList[umap[j]-1].getCoord('x')) + abs(y_coord - taskList[umap[j]-1].getCoord('y'))));
+                    distanceMatrix[i][j] = distance;
+                    distanceMatrix[j][i] = distance;
+                }
+            }
+
+            return;
+            break;
+        }
+        case D_GROUP_PREDICT: {
+
+            int group = user->getUID()%totalUsers;
+            //int group_st = totalIncentives/totalUsers;
+
+            unordered_map <int,int> umap;
+
+            int index_um   = 0;
+            int totalNodes = 0;
+            int tempDist   = 0;
+            int minDist    = boardSize * boardSize;
+            int targetST  = 0;
+            int x_user     = user->getCoord('x');
+            int y_user     = user->getCoord('y');
+
+            SensingTask *stp = nullptr;
+
+            for(int i = 0; i < totalIncentives; i++) { /* WARNING WASTEFUL LOOPS */
+                if((group == (i%totalUsers)) && (taskList[i].getUID() == 0)) {
+                    umap[index_um] = i;
+                    index_um++;
+                }
+            }
+
+            totalNodes = umap.size();
+
+            if(totalNodes > 2) {
+
+                for(int i = 0; i < totalNodes; i++) {
+                    for(int j = 0; j < totalNodes; j++) {
+                        if(i == j) continue;
+                        for(int k = 0; k < totalNodes; k++) {
+                            if((j == k) || (i == k)) continue;
+                            tempDist = abs(x_user - taskList[umap[i]].getCoord('x'))+ abs(y_user - taskList[umap[i]].getCoord('y')) + STdistanceMatrix[umap[i]][umap[j]] + STdistanceMatrix[umap[j]][umap[k]];
+                            if(tempDist < minDist) {
+                                minDist = tempDist;
+                                /* print best path */
+                                targetST = umap[i];
+                            }
+                            
+                        }
+
+                    }
+                    
+                }
+
+                /*
+                for(int i = 0; i < totalNodes; i++) {
+                    taskList[umap[i]].setReward(0.30 * taskList[umap[i]].getBaseReward());
+                }
+                */
+                for(int i = 0; i < totalIncentives; i++) {
+                    if(taskList[i].getUID() == 0) continue;
+                    taskList[umap[i]].setReward(0.30 * taskList[umap[i]].getBaseReward());
+                }
+                taskList[targetST].setReward(taskList[targetST].getBaseReward());
+                
+            }
+            else {
+                for (int i = 0; i < totalNodes; i++) {
+                    taskList[umap[i]-1].setReward(taskList[umap[i]].getBaseReward());
+                }
+                
+            }
 
             return;
             break;
@@ -479,6 +800,8 @@ void Game::save(ofstream* dataFile) {
 
     avgOpCost = avgOpCost * factor + sumOpCost/(double)trialNum;
 
+    avgSurplus = avgSurplus * factor + (preBudget - sumAccReward)/(double)trialNum;
+
     if(verbose) {
         /* game info */
         string finGameState = "";
@@ -538,7 +861,7 @@ void Game::save(ofstream* dataFile) {
                 << setw(intVal_width) << totalTime << sep << setw(intVal_width) << avgCostCell << sep
                 << setw(fltVal_width) << sumOpCost << sep << fixed << setprecision(2) << setw(fltVal_width) << sumAccReward << sep
                 << setw(fltVal_width) << (preBudget -sumAccReward) << sep
-                << setw(intVal_width) << remainSTs << sep << (preBudget - sumAccReward) << sep
+                << setw(intVal_width) << remainSTs << sep << setw(fltVal_width) << (preBudget - sumAccReward) << sep
                 << '\n' << line << endl;
     }
 
@@ -549,7 +872,7 @@ void Game::summary(ofstream* dataFile) {
         *dataFile << "\n Summary data:\n";
         *dataFile << "ORDER: Win Rates, Simulation Time, Operation Cost\n";
     }
-    *dataFile << avgWinRate << ' ' << avgSimTime << ' ' << avgOpCost << endl;
+    *dataFile << avgWinRate << ' ' << avgSimTime << ' ' << avgOpCost << ' ' << avgSurplus << endl;
 }
 
 /* Destructor */

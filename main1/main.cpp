@@ -37,12 +37,12 @@ int main(int argc, char **argv) {
 
     parseArgs(argc, argv, &trials, &userNum, &boardSize, &preBudget, &percent, &verbose);
     
-    dataFile.open("data.txt", ios::app);
+    dataFile.open("data2.txt", ios::app);
     
     numIncent = (int)floor(((float)(boardSize * boardSize) * percent / 100));
     
     Enviroment board(geoType, boardSize);
-    Game game(&board, S_UNIFORM, numIncent, userNum, boardSize, preBudget, verbose);    /* constructing phase */
+    Game game(&board, D_STCENTER, numIncent, userNum, boardSize, preBudget, verbose);    /* constructing phase */
     
     if(verbose){
         dataFile << "Number of Trials:\t" << trials
