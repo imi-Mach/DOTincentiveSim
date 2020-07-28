@@ -9,17 +9,17 @@ using namespace std;
 int main(int argc, char **argv) {
     ofstream dataFile;
     int    round         = 1;
-    int    trials        = 25;
+    int    trials        = 100;
     int    numIncent     = 0;
     int    userNum       = 3;
     int    boardSize     = 10;
-    float  x_spacing     = 0.3;
-    float  y_spacing     = 5;
+    float  x_spacing     = 0.6;
+    float  y_spacing     = 10;
     float  x_offset      = 20;
     float  y_offset      = 100;
     float  percent       = 0;
     float  preBudget     = 0;
-    size_t dataPoints    = 200; /* 100 */
+    size_t dataPoints    = 100; /* 100 */
     boardType geoType    = UNIFORM;
     IM_t incentiveMechanism = S_UNIFORM;
     int counter          = 0;
