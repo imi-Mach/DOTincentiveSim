@@ -171,6 +171,7 @@ void Game::set(int round) {
 
     state               = INPROGRESS;
     trialNum            = round;
+    staticFlag          = false;
     totalTime           = 0;
     totalDrops          = 0;
     finishedIncentives  = 0;
@@ -212,7 +213,7 @@ void Game::set(int round) {
     
     if(im == D_GROUP_PREDICT) {
 
-        vector<vector<int> > distanceMatrix( totalIncentives , vector<int> (totalIncentives, 0));
+        vector< vector<int> > distanceMatrix( totalIncentives , vector<int> (totalIncentives, 0));
         STdistanceMatrix = distanceMatrix;
 
         SensingTask* stp = nullptr;
@@ -232,6 +233,26 @@ void Game::set(int round) {
         }
 
     }
+    else if (im == D_PIT) {
+        vector< vector<int> > distanceMatrix( totalUsers, vector<int> (totalIncentives, 0));
+        STdistanceMatrix = distanceMatrix;
+
+        User* up = nullptr;
+        int x_coord = 0;
+        int y_coord = 0;
+        int distance = 0;
+
+        for(int i = 0; i < totalUsers; i++) {
+            up = &userList[i];
+            x_coord = up->getCoord('x');
+            y_coord = up->getCoord('x');
+            for(int j = 0; j < totalIncentives; j++) {
+                distance = abs((abs(x_coord - taskList[j].getCoord('x')) + abs(y_coord - taskList[j].getCoord('y'))));
+                STdistanceMatrix[i][j] = distance;
+            }
+        }
+        
+    }
 
 }
 
@@ -244,6 +265,29 @@ void Game::incentiveMechanism(User* user) {
 
             for(int i = 0; i < totalIncentives; i++) {
                 taskList[i].setReward(taskList[i].getBaseReward());
+            }
+            return;
+            break;
+        }
+        case S_PIT: {
+            if(staticFlag) return;
+            staticFlag = true;
+
+            SensingTask *stp = nullptr;
+            int x_coord = 0;
+            int y_coord = 0;
+            double avgDistance = 0;
+
+            for(int i = 0; i < totalIncentives; i++) {
+                avgDistance = 0;
+                stp = &taskList[i];
+                x_coord = stp->getCoord('x');
+                y_coord = stp->getCoord('y');
+                for(int j = 0; j < totalUsers; j++) {
+                    avgDistance += ((double)(abs(x_coord - userList[j].getCoord('x')) + abs(y_coord - userList[j].getCoord('y'))));
+                }
+                avgDistance = avgDistance / totalUsers;
+                stp->setReward(stp->getBaseReward() * ( 0.5 + 0.5 * avgDistance/(boardSize * 2))); /* for every 5 percent fo 2 times the board */
             }
             return;
             break;
@@ -308,6 +352,19 @@ void Game::incentiveMechanism(User* user) {
                 ratio = (((double)distance) / ((double)(2 * boardSize)))/2; /* 0.0-50.0 range */
                 stp->setReward((float)(1-ratio) * stp->getBaseReward());
             }
+            return;
+            break;
+        }
+        case D_PIT: {
+            SensingTask *stp = nullptr;
+
+            for(int i = 0; i < totalIncentives; i++) {
+                stp = &taskList[i];
+                if(stp->getUID() == 0) {
+                    stp->setReward(stp->getBaseReward() * ( 0.5 + 0.5 * STdistanceMatrix[user->getUID()-1][i]/(boardSize * 2))); /* for every 5 percent fo 2 times the board */
+                }
+            }
+
             return;
             break;
         }

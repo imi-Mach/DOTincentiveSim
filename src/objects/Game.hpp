@@ -17,8 +17,10 @@
 
 enum IM_t {
     S_UNIFORM,
+    S_PIT,            /* calculate avg distance from all users relative to a ST. "No one wants to be in a pit."*/
     S_STCENTER,
     S_USERCENTER,
+    D_PIT,            /* calculate distance from all IM stored in a distance Matrix relative to each user */
     D_STCENTER,
     D_USERCENTER,
     D_PREDICT,
