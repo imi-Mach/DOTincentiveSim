@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
     numIncent = (int)floor(((float)(boardSize * boardSize) * percent / 100));
     
     Enviroment board(geoType, boardSize);
-    Game game(&board, S_PIT, numIncent, userNum, boardSize, preBudget, verbose);    /* constructing phase */
+    Game game(&board, D_RA, numIncent, userNum, boardSize, preBudget, verbose);    /* constructing phase */
     
     if(verbose){
         dataFile << "Number of Trials:\t" << trials

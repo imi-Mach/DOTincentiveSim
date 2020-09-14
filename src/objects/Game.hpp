@@ -28,7 +28,8 @@ enum IM_t {
     D_TSP,
     D_GROUP_TSP,
     D_GROUP_PREDICT,
-    D_STREAK
+    D_STREAK,
+    D_RA
 };
 
 enum gameStatus {           /* different states of game */
@@ -68,6 +69,7 @@ class Game {                /* Game class maintains crucial information about st
         double avgOpCost;                         /* var desc: avg operation cost */
         double avgSurplus;
         Enviroment* board;                       /* var desc: enviroment created for game */
+        vector<vector<float>> costMatrix;
         vector<vector<int>> STdistanceMatrix;
         vector<User> userList;                   /* var desc: physical list of users that is referenced by methods */
         vector<SensingTask> taskList;            /* var desc: physical list of ST that is referenced by methods*/

@@ -17,8 +17,8 @@ INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS = $(INC_FLAGS) -MMD -MP -ggdb
-CXXFLAGS = -std=c++14 -stdlib=libc++ 
-LDFLAGS = -stdlib=libc++
+CXXFLAGS = -std=c++14 #-stdlib=libc++ 
+LDFLAGS = #-stdlib=libc++
 
 all: $(TARGET_EXEC)
 

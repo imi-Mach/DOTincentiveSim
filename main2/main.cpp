@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     float  preBudget     = 0;
     size_t dataPoints    = 100; /* 100 */
     boardType geoType    = UNIFORM;
-    IM_t incentiveMechanism = S_UNIFORM;
+    IM_t incentiveMechanism = D_RA;
     int counter             = 0;
 
     dataFile.open("data2.txt", ios_base::app);

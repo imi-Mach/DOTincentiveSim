@@ -253,6 +253,41 @@ void Game::set(int round) {
         }
         
     }
+    else if (im == D_RA) {
+
+        vector< vector<float> > selectionMatrix( totalUsers, vector<float> (totalIncentives, -1000));
+        
+        vector<double> prices(userList.size());
+
+        double min = 10000;
+        int index = 0;
+        int x_abs = 0;
+        int y_abs = 0;
+
+        for(int i = 0; i < taskList.size(); i++) {
+            for(int j = 0; j < prices.size(); j++) {
+
+                x_abs = abs(userList[j].getCoord('x') - taskList[i].getCoord('x'));
+                y_abs = abs(userList[j].getCoord('y') - taskList[i].getCoord('y'));
+
+                prices[j] = 1.15 * (double)(x_abs + y_abs);
+
+                if (prices[j] < min) {
+                    min = prices[j];
+                    index = j;
+                } 
+            }
+
+            if(min < (preBudget/totalIncentives)) {
+                selectionMatrix[index][i] = min;
+            }
+            
+            min = 10000;
+        }
+
+        costMatrix = selectionMatrix;
+
+    }
 
 }
 
@@ -724,6 +759,16 @@ void Game::incentiveMechanism(User* user) {
         }
 
         case D_STREAK: {
+            return;
+            break;
+        }
+
+        case D_RA: {
+
+            for(int i = 0; i < totalIncentives; i++) {
+                taskList[i].setReward(costMatrix[user->getUID()-1][i]);
+            }
+
             return;
             break;
         }
