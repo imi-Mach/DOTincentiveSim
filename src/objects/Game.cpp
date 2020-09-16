@@ -261,16 +261,20 @@ void Game::set(int round) {
 
         double min = 10000;
         int index = 0;
+        /*
         int x_abs = 0;
         int y_abs = 0;
+        */
 
         for(int i = 0; i < taskList.size(); i++) {
             for(int j = 0; j < prices.size(); j++) {
 
+                /*
                 x_abs = abs(userList[j].getCoord('x') - taskList[i].getCoord('x'));
                 y_abs = abs(userList[j].getCoord('y') - taskList[i].getCoord('y'));
+                */
 
-                prices[j] = 1.15 * (double)(x_abs + y_abs);
+                prices[j] = 1000 + rng(100);
 
                 if (prices[j] < min) {
                     min = prices[j];
@@ -278,9 +282,10 @@ void Game::set(int round) {
                 } 
             }
 
-            if(min < (preBudget/totalIncentives)) {
+            /*if(min < (preBudget/totalIncentives)) {
                 selectionMatrix[index][i] = min;
-            }
+            }*/
+            selectionMatrix[index][i] = min;
             
             min = 10000;
         }
