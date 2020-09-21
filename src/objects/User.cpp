@@ -58,7 +58,7 @@ void User::selectSID(Enviroment* board, vector<SensingTask>* sensingTaskList, in
     float max_reward    = 0;
     float temp_profit   = 0;
     float max_profit    = 0;
-    float nmp_thres     = 10; /* minimum acceptable net marginal profit threshold for user to accept task */
+    float nmp_thres     = 100; /* minimum acceptable net marginal profit threshold for user to accept task */
     float nmp           = 0;    
 
     for(int i = 0; i < numTasks; i++) {                     /* maximum reward finding algorithm */
@@ -91,10 +91,11 @@ void User::selectSID(Enviroment* board, vector<SensingTask>* sensingTaskList, in
         nmp = 100.0 * (max_profit + accReward) / accReward;
     }
     else if(accReward == 0) {    /* calculation if accReward is undefined */
-        nmp = 100.0 * max_profit / max_reward;
+        nmp = 100.0 * (max_profit + max_reward) / max_reward; //max_reward / max_reward;
     }
 
     /* if threshold is not surpased then dropout condition occurs */
+    //cout << "[" << UID << "] : nmp = " << nmp << endl;
     if (nmp_thres > nmp) {
         SID = -1;
         return;
