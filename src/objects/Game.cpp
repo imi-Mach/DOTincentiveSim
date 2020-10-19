@@ -255,6 +255,10 @@ void Game::set(int round) {
     }
     else if (im == D_RA) {
 
+        std::random_device rd; 
+
+        mt19937 gen(rd()); 
+
         vector< vector<float> > selectionMatrix( totalUsers, vector<float> (totalIncentives, -1000));
         
         vector<double> prices(userList.size());
@@ -273,8 +277,9 @@ void Game::set(int round) {
                 x_abs = abs(userList[j].getCoord('x') - taskList[i].getCoord('x'));
                 y_abs = abs(userList[j].getCoord('y') - taskList[i].getCoord('y'));
                 */
+                normal_distribution<double> d((double)(preBudget/totalIncentives),0.5*0.5);
 
-                prices[j] = 1000 + rng(100);
+                prices[j] = d(gen);
 
                 if (prices[j] < min) {
                     min = prices[j];
@@ -282,9 +287,10 @@ void Game::set(int round) {
                 } 
             }
 
-            /*if(min < (preBudget/totalIncentives)) {
-                selectionMatrix[index][i] = min;
+            /*if(min > (double)(preBudget/totalIncentives)) {
+                selectionMatrix[index][i] = -1000;
             }*/
+
             selectionMatrix[index][i] = min;
             
             min = 10000;

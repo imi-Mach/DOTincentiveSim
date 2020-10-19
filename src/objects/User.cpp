@@ -91,11 +91,10 @@ void User::selectSID(Enviroment* board, vector<SensingTask>* sensingTaskList, in
         nmp = 100.0 * (max_profit + accReward) / accReward;
     }
     else if(accReward == 0) {    /* calculation if accReward is undefined */
-        nmp = 100.0 * (max_profit + max_reward) / max_reward; //max_reward / max_reward;
+        nmp = 100.0 * (max_profit + max_reward) / max_reward;
     }
 
     /* if threshold is not surpased then dropout condition occurs */
-    //cout << "[" << UID << "] : nmp = " << nmp << endl;
     if (nmp_thres > nmp) {
         SID = -1;
         return;

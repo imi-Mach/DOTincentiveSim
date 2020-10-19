@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
     int    round         = 1;
     int    trials        = 100;
     int    numIncent     = 0;
-    int    userNum       = 3;
+    int    userNum       = 15;
     int    boardSize     = 10;
     float  x_spacing     = 0.6; /* 0.6 */
     float  y_spacing     = 10;  /* 10 */
@@ -21,10 +21,10 @@ int main(int argc, char **argv) {
     float  preBudget     = 0;
     size_t dataPoints    = 100; /* 100 */
     boardType geoType    = UNIFORM;
-    IM_t incentiveMechanism = S_UNIFORM;
+    IM_t incentiveMechanism = D_RA;
     int counter             = 0;
 
-    dataFile.open("data2.txt", ios_base::app);
+    dataFile.open("dataDAuction15.txt", ios_base::app);
 
     if(!dataFile.is_open()) {
         bail(99, "Failed to open data file.");
