@@ -87,7 +87,7 @@ int Game::step(User* movingUser,Cell* oldCell, const char option) {
             return cp->getCost();
             break;
     }
-    bail(3, "FATA error: Game::Step failed to select viable \"option\".");
+    bail(3, "FATAL error: Game::Step failed to select viable \"option\".");
     return -1;
     
 }
@@ -774,11 +774,23 @@ void Game::incentiveMechanism(User* user) {
             break;
         }
 
-        case D_RA: {
+        case D_RA: {                /* TODO */
 
             for(int i = 0; i < totalIncentives; i++) {
                 taskList[i].setReward(costMatrix[user->getUID()-1][i]);
             }
+
+            return;
+            break;
+        }
+
+        case D_STCENTER_CLUSTER: {  /* TODO */
+
+            return;
+            break;
+        }
+
+        case D_PIT_CLUSTER: {       /* TODO */
 
             return;
             break;

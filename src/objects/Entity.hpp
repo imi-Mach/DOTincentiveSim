@@ -1,7 +1,7 @@
 #ifndef ENTITY
 #define ENTITY
 
-#include "functions.h"  /* definition of bai function */
+#include "functions.h"  /* definition of bail function */
 
 class Entity {          /* Entity is a base class for User and SensingTask */
     public:

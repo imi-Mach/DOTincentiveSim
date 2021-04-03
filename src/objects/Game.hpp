@@ -16,20 +16,28 @@
 #include "functions.h"      /* bail function */
 
 enum IM_t {
+
+    /* Current paper IM */
     S_UNIFORM,
-    S_PIT,            /* calculate avg distance from all users relative to a ST. "No one wants to be in a pit."*/
+    D_STCENTER,
+    D_STCENTER_CLUSTER,
+    D_PIT_CLUSTER,
+    D_RA,
+
+    /* Implemented, but not consider in newest paper */
+    S_PIT,
     S_STCENTER,
     S_USERCENTER,
-    D_PIT,            /* calculate distance from all IM stored in a distance Matrix relative to each user */
-    D_STCENTER,
+    D_PIT,
     D_USERCENTER,
     D_PREDICT,
     D_RELATIVE,
+    
+    /* Considered, but not yet implemented */
     D_TSP,
     D_GROUP_TSP,
     D_GROUP_PREDICT,
     D_STREAK,
-    D_RA
 };
 
 enum gameStatus {           /* different states of game */
@@ -64,9 +72,9 @@ class Game {                /* Game class maintains crucial information about st
         int finishedIncentives;                  /* var desc: current number of finished incentives*/
         int boardSize;                           /* var desc: side length of square board */
         float preBudget;                         /* var desc: predicted budget */
-        double avgWinRate;                        /* var desc: avg success rate */
-        double avgSimTime;                        /* var desc: avg simulation time */
-        double avgOpCost;                         /* var desc: avg operation cost */
+        double avgWinRate;                       /* var desc: avg success rate */
+        double avgSimTime;                       /* var desc: avg simulation time */
+        double avgOpCost;                        /* var desc: avg operation cost */
         double avgSurplus;
         Enviroment* board;                       /* var desc: enviroment created for game */
         vector<vector<float>> costMatrix;
