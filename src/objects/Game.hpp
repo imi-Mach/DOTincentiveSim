@@ -9,6 +9,7 @@
 #include <thread>           /* debugging purposes when displaying turns */
 #include <fstream>          /* file for storing game results */
 #include <iomanip>          /* printing formats for storing results */
+#include "Kmeans.hpp"
 #include "Cell.hpp"         /* definition of cell */
 #include "User.hpp"         /* definition of user */
 #include "SensingTask.hpp"  /* definition of ST */

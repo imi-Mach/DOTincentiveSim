@@ -121,7 +121,7 @@ int KMeans::getNearestClusterId(Point point) {
     return NearestClusterId;
 }
 
-void KMeans::run(vector<Point>& all_points){
+vector<vector<double>> KMeans::run(vector<Point>& all_points){
     
     total_points = all_points.size();
     dimensions = all_points[0].getDimensions();
@@ -196,6 +196,17 @@ void KMeans::run(vector<Point>& all_points){
     }
 
     // Cluster assignments should be stored in the points
+
+    vector<vector<double>> centroids (this->K, vector<double>(dimensions));
+
+    for(int i = 0; i < this->K; i++){
+        for (int j = 0; i < dimensions; j++){
+            centroids[i][j] = clusters[i].getCentroidByPos(j);
+        }
+    }
+
+    return centroids;
+    
 
 }
 

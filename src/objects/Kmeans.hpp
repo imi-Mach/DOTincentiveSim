@@ -1,17 +1,13 @@
 #ifndef KMEANS
 #define KMEANS
 
-#include <iostream>
 #include <vector>
 #include <cmath>
-#include <fstream>
-#include <sstream>
 #include <algorithm>
 
 using namespace std;
 
 class Point{
-
     public:
         Point(int id, int x, int y);
         int getDimensions();
@@ -26,7 +22,6 @@ class Point{
 };
 
 class Cluster{
-
     private:
         int clusterId;
         vector<double> centroid;
@@ -52,7 +47,7 @@ class KMeans{
         int getNearestClusterId(Point point);
     public:
         KMeans(int K, int iterations);
-        void run(vector<Point>& all_points);
+        vector<vector<double>> run(vector<Point>& all_points);
 
 };
 

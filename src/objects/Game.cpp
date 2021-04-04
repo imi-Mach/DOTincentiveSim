@@ -786,6 +786,47 @@ void Game::incentiveMechanism(User* user) {
 
         case D_STCENTER_CLUSTER: {  /* TODO */
 
+            int k = 3;
+            int iter = 100;
+            
+            vector<Point> remainingIncentives;
+
+            for(int i = 0; i < totalIncentives; i++){
+                if (taskList[i].getUID() == 0){
+                    remainingIncentives.push_back(Point(taskList[i].getSID(),taskList[i].getCoord('x'),taskList[i].getCoord('y')));
+                }
+            }
+
+            if(k > remainingIncentives.size()){
+                if(remainingIncentives.size() != 0)
+                    k = remainingIncentives.size();
+                else
+                    return;
+            }
+
+            KMeans kmeans = KMeans(k, iter);
+
+            vector<vector<double>> centroids = kmeans.run(remainingIncentives);
+            
+            
+            SensingTask *stp = nullptr;
+            double disp_x = 0;
+            double disp_y = 0;
+            double distance = 0;
+            double ratio = 0;
+
+            int tasksLeft = remainingIncentives.size();
+
+            for(int i = 0; i < tasksLeft; i++){
+                stp = &taskList[remainingIncentives[i].getID()-1];
+                disp_x = abs((double)stp->getCoord('x') - centroids[remainingIncentives[i].getID()-1][0]);
+                disp_y = abs((double)stp->getCoord('y') - centroids[remainingIncentives[i].getID()-1][1]);
+                distance = disp_x + disp_y;
+                ratio = (distance / ((double)(2 * boardSize)))/2; /* 0.0-50.0 range */
+                stp->setReward((float)(1-ratio) * stp->getBaseReward());
+            }
+            
+
             return;
             break;
         }
