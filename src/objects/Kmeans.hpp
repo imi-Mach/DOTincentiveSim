@@ -13,7 +13,7 @@ using namespace std;
 class Point{
 
     public:
-        Point(int id, string line);
+        Point(int id, int x, int y);
         int getDimensions();
         int getCluster();
         int getID();
