@@ -39,7 +39,7 @@ class Cluster{
         Point getPoint(int pos);
         int getSize();
         double getCentroidByPos(int pos);
-        double getCentroidByPos(int pos, double val);
+        void setCentroidByPos(int pos, double val);
 };
 
 class KMeans{
