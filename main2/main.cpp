@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char **argv) {
     ofstream dataFile;
     int    round         = 1;
-    int    trials        = 100;
+    int    trials        = 1;
     int    numIncent     = 0;
     int    userNum       = 15;
     int    boardSize     = 10;
@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     float  preBudget     = 0;
     size_t dataPoints    = 100; /* 100 */
     boardType geoType    = UNIFORM;
-    IM_t incentiveMechanism = D_RA;
+    IM_t incentiveMechanism = D_STCENTER_CLUSTER;
     int counter             = 0;
 
     dataFile.open("dataDAuction15.txt", ios_base::app);
