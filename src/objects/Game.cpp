@@ -819,8 +819,8 @@ void Game::incentiveMechanism(User* user) {
 
             for(int i = 0; i < tasksLeft; i++){
                 stp = &taskList[remainingIncentives[i].getID()-1];
-                disp_x = abs((double)stp->getCoord('x') - centroids[remainingIncentives[i].getID()-1][0]);
-                disp_y = abs((double)stp->getCoord('y') - centroids[remainingIncentives[i].getID()-1][1]);
+                disp_x = abs((double)stp->getCoord('x') - centroids[remainingIncentives[i].getCluster()-1][0]);
+                disp_y = abs((double)stp->getCoord('y') - centroids[remainingIncentives[i].getCluster()-1][1]);
                 distance = disp_x + disp_y;
                 ratio = (distance / ((double)(2 * boardSize)))/2; /* 0.0-50.0 range */
                 stp->setReward((float)(1-ratio) * stp->getBaseReward());
