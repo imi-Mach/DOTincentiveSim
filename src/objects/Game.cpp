@@ -245,7 +245,7 @@ void Game::set(int round) {
         for(int i = 0; i < totalUsers; i++) {
             up = &userList[i];
             x_coord = up->getCoord('x');
-            y_coord = up->getCoord('x');
+            y_coord = up->getCoord('y');
             for(int j = 0; j < totalIncentives; j++) {
                 distance = abs((abs(x_coord - taskList[j].getCoord('x')) + abs(y_coord - taskList[j].getCoord('y'))));
                 STdistanceMatrix[i][j] = distance;
@@ -298,6 +298,45 @@ void Game::set(int round) {
 
         costMatrix = selectionMatrix;
 
+    }
+    else if (im == D_PIT_CLUSTER) {
+        vector< vector<int> > distanceMatrix( totalUsers, vector<int> (totalIncentives, 0));
+        STdistanceMatrix = distanceMatrix;
+
+        /* start clustering */
+
+        vector<Point> incentiveDataSet;
+
+        for(int i = 0; i < totalIncentives; i++){
+            incentiveDataSet.push_back(Point(taskList[i].getSID(),taskList[i].getCoord('x'),taskList[i].getCoord('y')));
+        }
+
+        int k = 3;
+        int iter = 100;
+
+        if(k > incentiveDataSet.size()){
+            if(incentiveDataSet.size() != 0)
+                k = incentiveDataSet.size();
+            else
+                bail(99, "ERROR: cannot cluster less than 1 data point");
+        }
+
+        KMeans kmeans = KMeans(k, iter);
+
+        vector<vector<double>> centroids = kmeans.run(incentiveDataSet);
+
+        /* finished clustering */
+
+        SensingTask* stp = nullptr;
+        int x_coord = 0;
+        int y_coord = 0;
+        int distance = 0;
+
+
+        for(int i = 0; i < totalIncentives; i++) {
+            distance = abs((abs(taskList[i].getCoord('x') - centroids[incentiveDataSet[i].getID()-1][0]) + abs(taskList[i].getCoord('y') - centroids[incentiveDataSet[i].getID()-1][1])));
+            STdistanceMatrix[i][j] = distance;
+        }
     }
 
 }
@@ -784,7 +823,7 @@ void Game::incentiveMechanism(User* user) {
             break;
         }
 
-        case D_STCENTER_CLUSTER: {  /* TODO */
+        case D_STCENTER_CLUSTER: {
 
             int k = 3;
             int iter = 100;
@@ -832,6 +871,55 @@ void Game::incentiveMechanism(User* user) {
         }
 
         case D_PIT_CLUSTER: {       /* TODO */
+            
+            if(staticFlag) return;
+            staticFlag = true;
+
+            /* start clustering */
+
+            vector<Point> incentiveDataSet;
+
+            for(int i = 0; i < totalIncentives; i++){
+                incentiveDataSet.push_back(Point(taskList[i].getSID(),taskList[i].getCoord('x'),taskList[i].getCoord('y')));
+            }
+
+            int k = 3;
+            int iter = 100;
+
+            if(k > incentiveDataSet.size()){
+                if(incentiveDataSet.size() != 0)
+                    k = incentiveDataSet.size();
+                else
+                    bail(99, "ERROR: cannot cluster less than 1 data point");
+            }
+
+            KMeans kmeans = KMeans(k, iter);
+
+            vector<vector<double>> centroids = kmeans.run(incentiveDataSet);
+
+            /* finished clustering */
+
+            SensingTask* stp = nullptr;
+            int x_coord = 0;
+            int y_coord = 0;
+            int distance = 0;
+
+
+            for(int i = 0; i < totalIncentives; i++) {
+                distance = abs((abs(taskList[i].getCoord('x') - centroids[incentiveDataSet[i].getID()-1][0]) + abs(taskList[i].getCoord('y') - centroids[incentiveDataSet[i].getID()-1][1])));
+                STdistanceMatrix[i][j] = distance;
+            }
+            
+            
+            SensingTask *stp = nullptr;
+
+            for(int i = 0; i < totalIncentives; i++) {
+                stp = &taskList[i];
+                if(stp->getUID() == 0) {
+                    /* for every 5 percent fo 2 times the board */
+                    stp->setReward(stp->getBaseReward() * (0.5 + 0.5 * abs((abs(stp->getCoord('x') - centroids[incentiveDataSet[i].getID()-1][0]) + abs(stp->getCoord('y') - centroids[incentiveDataSet[i].getID()-1][1])))/(boardSize * 2)));
+                }
+            }
 
             return;
             break;
