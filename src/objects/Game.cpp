@@ -299,45 +299,6 @@ void Game::set(int round) {
         costMatrix = selectionMatrix;
 
     }
-    else if (im == D_PIT_CLUSTER) {
-        vector< vector<int> > distanceMatrix( totalUsers, vector<int> (totalIncentives, 0));
-        STdistanceMatrix = distanceMatrix;
-
-        /* start clustering */
-
-        vector<Point> incentiveDataSet;
-
-        for(int i = 0; i < totalIncentives; i++){
-            incentiveDataSet.push_back(Point(taskList[i].getSID(),taskList[i].getCoord('x'),taskList[i].getCoord('y')));
-        }
-
-        int k = 3;
-        int iter = 100;
-
-        if(k > incentiveDataSet.size()){
-            if(incentiveDataSet.size() != 0)
-                k = incentiveDataSet.size();
-            else
-                bail(99, "ERROR: cannot cluster less than 1 data point");
-        }
-
-        KMeans kmeans = KMeans(k, iter);
-
-        vector<vector<double>> centroids = kmeans.run(incentiveDataSet);
-
-        /* finished clustering */
-
-        SensingTask* stp = nullptr;
-        int x_coord = 0;
-        int y_coord = 0;
-        int distance = 0;
-
-
-        for(int i = 0; i < totalIncentives; i++) {
-            distance = abs((abs(taskList[i].getCoord('x') - centroids[incentiveDataSet[i].getID()-1][0]) + abs(taskList[i].getCoord('y') - centroids[incentiveDataSet[i].getID()-1][1])));
-            STdistanceMatrix[i][j] = distance;
-        }
-    }
 
 }
 
@@ -902,14 +863,7 @@ void Game::incentiveMechanism(User* user) {
             SensingTask* stp = nullptr;
             int x_coord = 0;
             int y_coord = 0;
-            int distance = 0;
-
-
-            for(int i = 0; i < totalIncentives; i++) {
-                distance = abs((abs(taskList[i].getCoord('x') - centroids[incentiveDataSet[i].getID()-1][0]) + abs(taskList[i].getCoord('y') - centroids[incentiveDataSet[i].getID()-1][1])));
-                STdistanceMatrix[i][j] = distance;
-            }
-            
+            int distance = 0;           
             
             SensingTask *stp = nullptr;
 
