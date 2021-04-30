@@ -22,7 +22,7 @@ enum IM_t {
     S_UNIFORM,
     D_STCENTER,
     D_STCENTER_CLUSTER,
-    D_PIT_CLUSTER,
+    S_PIT_CLUSTER,
     D_RA,
 
     /* Implemented, but not consider in newest paper */

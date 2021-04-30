@@ -831,7 +831,7 @@ void Game::incentiveMechanism(User* user) {
             break;
         }
 
-        case D_PIT_CLUSTER: {       /* TODO */
+        case S_PIT_CLUSTER: {       /* TODO */
             
             if(staticFlag) return;
             staticFlag = true;
