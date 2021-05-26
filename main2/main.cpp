@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char **argv) {
     ofstream dataFile;
     int    round         = 1;
-    int    trials        = 1;
+    int    trials        = 10;
     int    numIncent     = 0;
     int    userNum       = 15;
     int    boardSize     = 10;
@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     IM_t incentiveMechanism = D_STCENTER_CLUSTER;
     int counter             = 0;
 
-    dataFile.open("dataDAuction15.txt", ios_base::app);
+    dataFile.open("DSTCC_DataFile.txt", ios_base::app);
 
     if(!dataFile.is_open()) {
         bail(99, "Failed to open data file.");

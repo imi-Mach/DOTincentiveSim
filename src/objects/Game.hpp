@@ -20,13 +20,13 @@ enum IM_t {
 
     /* Current paper IM */
     S_UNIFORM,
+    S_PIT,
     D_STCENTER,
     D_STCENTER_CLUSTER,
     S_PIT_CLUSTER,
     D_RA,
 
     /* Implemented, but not consider in newest paper */
-    S_PIT,
     S_STCENTER,
     S_USERCENTER,
     D_PIT,

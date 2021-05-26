@@ -863,16 +863,13 @@ void Game::incentiveMechanism(User* user) {
             SensingTask* stp = nullptr;
             int x_coord = 0;
             int y_coord = 0;
-            int distance = 0;           
-            
-            SensingTask *stp = nullptr;
+            int distance = 0;
 
             for(int i = 0; i < totalIncentives; i++) {
                 stp = &taskList[i];
-                if(stp->getUID() == 0) {
-                    /* for every 5 percent fo 2 times the board */
-                    stp->setReward(stp->getBaseReward() * (0.5 + 0.5 * abs((abs(stp->getCoord('x') - centroids[incentiveDataSet[i].getID()-1][0]) + abs(stp->getCoord('y') - centroids[incentiveDataSet[i].getID()-1][1])))/(boardSize * 2)));
-                }
+                
+                /* for every 5 percent fo 2 times the board */
+                stp->setReward(stp->getBaseReward() * (0.5 + 0.5 * abs((abs(stp->getCoord('x') - centroids[incentiveDataSet[i].getID()-1][0]) + abs(stp->getCoord('y') - centroids[incentiveDataSet[i].getID()-1][1])))/(boardSize * 2)));
             }
 
             return;
@@ -1080,6 +1077,9 @@ void Game::summary(ofstream* dataFile) {
         *dataFile << "\n Summary data:\n";
         *dataFile << "ORDER: Win Rates, Simulation Time, Operation Cost\n";
     }
+
+    /* TODO: Add new paramter for battery consumption */
+
     *dataFile << avgWinRate << ' ' << avgSimTime << ' ' << avgOpCost << ' ' << avgSurplus << endl;
 }
 
