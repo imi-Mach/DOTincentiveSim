@@ -3,6 +3,21 @@ This is the C++ code for simulating different IM.
 
 ## Instructions:
 
+NEW Instructions
+
+(Running several rounds)
+
+1. go to ./main2 folder
+2. open main.cpp
+3. Adjust the settings as desired
+    A. You can view the IM options in "./src/objects/Game.hpp"
+    B. Make sure to change the name of teh output file (Line 27 in main.cpp)
+4. To run the test:
+    A. type "make clean"
+    B. type "make test"
+    C. "./test" or "./test.out"
+
+
 ### 1. Compile with C++11 std or higher.
 - If you are on linux this may not work, unless the default compiler is changed to g++ (currently clang++)
 

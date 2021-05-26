@@ -23,7 +23,7 @@ enum IM_t {
     S_PIT,
     D_STCENTER,
     D_STCENTER_CLUSTER,
-    S_PIT_CLUSTER,
+    S_PIT_CLUSTER,       /* TODO: I may need to fix this */
     D_RA,
 
     /* Implemented, but not consider in newest paper */

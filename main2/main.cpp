@@ -8,20 +8,20 @@ using namespace std;
 
 int main(int argc, char **argv) {
     ofstream dataFile;
-    int    round         = 1;
-    int    trials        = 10;
+    int    round         = 1; /* constant */
+    int    trials        = 10; /* May want to change: */
     int    numIncent     = 0;
     int    userNum       = 15;
     int    boardSize     = 10;
-    float  x_spacing     = 0.6; /* 0.6 */
-    float  y_spacing     = 10;  /* 10 */
-    float  x_offset      = 20;
-    float  y_offset      = 100;
-    float  percent       = 0;
-    float  preBudget     = 0;
+    float  x_spacing     = 0.6; /* May want to change: 0.6 */
+    float  y_spacing     = 10;  /* May want to change: 10 */
+    float  x_offset      = 20;  /* coverage percentage */
+    float  y_offset      = 100; /* predicted budget */
+    float  percent       = 0;   /* constant */
+    float  preBudget     = 0;   /* constant */
     size_t dataPoints    = 100; /* 100 */
     boardType geoType    = UNIFORM;
-    IM_t incentiveMechanism = D_STCENTER_CLUSTER;
+    IM_t incentiveMechanism = D_STCENTER_CLUSTER; /* Where you can change the IM */
     int counter             = 0;
 
     dataFile.open("DSTCC_DataFile.txt", ios_base::app);
